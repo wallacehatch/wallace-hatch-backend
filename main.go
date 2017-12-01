@@ -29,6 +29,7 @@ func main() {
 	router.HandleFunc("/contact-form", ContactFormHandler).Methods("POST")
 	router.HandleFunc("/email-signup", EmailSignupHandler).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8000", router))
+
 }
 
 func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
