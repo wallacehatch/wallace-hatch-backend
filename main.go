@@ -24,6 +24,12 @@ type EmailSignup struct {
 	Subscribed   bool   `json:"subscribed"`
 }
 
+var mailchimpAPIKey string
+
+func init() {
+	mailchimpAPIKey = os.Getenv("MAILCHIMP_API")
+}
+
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/contact-form", ContactFormHandler).Methods("POST")
@@ -33,7 +39,7 @@ func main() {
 }
 
 func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
-	err := mailchimp.SetKey("YOUR-API-KEY")
+	err := mailchimp.SetKey(mailchimpAPIKey)
 	contactForm := ContactForm{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -62,7 +68,7 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
-	err := mailchimp.SetKey("YOUR-API-KEY")
+	err := mailchimp.SetKey(mailchimpAPIKey)
 	emailSignup := EmailSignup{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
