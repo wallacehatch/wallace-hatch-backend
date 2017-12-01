@@ -2,13 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	mailchimp "github.com/beeker1121/mailchimp-go"
 	"github.com/beeker1121/mailchimp-go/lists/members"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 )
@@ -29,6 +28,7 @@ type EmailSignup struct {
 var mailchimpAPIKey string
 
 func init() {
+	log.SetFormatter(&log.JSONFormatter{})
 	mailchimpAPIKey = os.Getenv("MAILCHIMP_API")
 }
 
@@ -43,7 +43,7 @@ func main() {
 	router.HandleFunc("/contact-form/", ContactFormHandler).Methods("POST")
 	router.HandleFunc("/email-signup/", EmailSignupHandler).Methods("POST")
 	handler := c.Handler(router)
-	log.Println("Serving on 8090")
+	log.Info("Serving on 8090")
 	log.Fatal(http.ListenAndServe(":8090", handler))
 
 }
@@ -53,12 +53,13 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 	contactForm := ContactForm{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		log.Error("Error in body form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
 	err = json.Unmarshal(body, &contactForm)
 	if err != nil {
-		log.Fatal("Error decoding contact form form ", err)
+		log.Error("Error decoding contact form form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
@@ -74,7 +75,7 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 
 	member, err := members.New("7343633629", params)
 	if err != nil {
-		log.Fatal("Error with mailchimp on contact form", err, params, member)
+		log.Error("Error with mailchimp on contact form", err, params, member)
 	}
 	respondJson("true", http.StatusOK, w)
 	return
@@ -86,12 +87,13 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 	emailSignup := EmailSignup{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		log.Error("Error in body  of email signup form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
 	err = json.Unmarshal(body, &emailSignup)
 	if err != nil {
-		fmt.Println("Error decoding email singup form ", err)
+		log.Error("Error decoding email singup form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
@@ -105,7 +107,7 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	member, err := members.New("06e5278452", params)
 	if err != nil {
-		log.Fatal("Error with mailchimp  on email form", err, params, member)
+		log.Error("Error with mailchimp  on email form", err, params, member)
 	}
 	respondJson("true", http.StatusOK, w)
 	return
