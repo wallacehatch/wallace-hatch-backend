@@ -1,5 +1,5 @@
-hash: a8a2cedc780f63949b7214ada1d30416eeca37df380204264cecfc4aafe1ba99
-updated: 2017-12-01T12:11:09.232917-05:00
+hash: ed479133e82a7ec1a0ecfb84300cc7165cae14b7b9a53c121bb807f5adf3bac2
+updated: 2017-12-01T14:01:04.140101-05:00
 imports:
 - name: github.com/beeker1121/mailchimp-go
   version: 7c5f827423b2a08c0cb05f6a79ea9fec1d2eb257
@@ -10,4 +10,6 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 7f08801859139f86dfafd1c296e2cba9a80d292e
+- name: github.com/rs/cors
+  version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 testImports: []

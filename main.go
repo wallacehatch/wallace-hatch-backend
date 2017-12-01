@@ -6,22 +6,24 @@ import (
 	mailchimp "github.com/beeker1121/mailchimp-go"
 	"github.com/beeker1121/mailchimp-go/lists/members"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 // The person Type (more like an object)
 type ContactForm struct {
-	FullName     string `json:"full_name"`
-	EmailAddress string `json:"email_address"`
-	CompanyName  string `json:"company_name"`
-	Message      string `json:"message"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Company string `json:"company"`
+	Message string `json:"message"`
 }
 
 type EmailSignup struct {
-	EmailAddress string `json:"email_address"`
-	Subscribed   bool   `json:"subscribed"`
+	Email      string `json:"email"`
+	Subscribed bool   `json:"subscribed"`
 }
 
 var mailchimpAPIKey string
@@ -31,10 +33,17 @@ func init() {
 }
 
 func main() {
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
+
 	router := mux.NewRouter()
-	router.HandleFunc("/contact-form", ContactFormHandler).Methods("POST")
-	router.HandleFunc("/email-signup", EmailSignupHandler).Methods("POST")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	router.HandleFunc("/contact-form/", ContactFormHandler).Methods("POST")
+	router.HandleFunc("/email-signup/", EmailSignupHandler).Methods("POST")
+	handler := c.Handler(router)
+	log.Fatal(http.ListenAndServe(":8090", handler))
 
 }
 
@@ -48,20 +57,24 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(body, &contactForm)
 	if err != nil {
-
-		fmt.Println("Error decoding contact form ", err)
+		fmt.Println("Error decoding contact form form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
-	// Set request parameters.
+	status := "unsubscribed"
+	mergeFields := make(map[string]interface{})
+	mergeFields["COMPANY"] = contactForm.Company
+	mergeFields["MESSAGE"] = contactForm.Message
 
-	params := &members.NewParams{
-		EmailAddress: contactForm.EmailAddress,
-		Status:       members.StatusSubscribed,
+	params := &members.NewParams{}
+	params.EmailAddress = contactForm.Email
+	params.MergeFields = mergeFields
+	params.Status = members.Status(status)
+
+	member, err := members.New("7343633629", params)
+	if err != nil {
+		fmt.Errorf("Error with mailchimp on contact form", err, params, member)
 	}
-	// Add member to list 123456.
-	member, err := members.New("123456", params)
-	fmt.Println("new member is ", member)
 	respondJson("true", http.StatusOK, w)
 	return
 
@@ -81,16 +94,19 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
-	// Set request parameters.
-	params := &members.NewParams{
-		EmailAddress: emailSignup.EmailAddress,
-		Status:       members.StatusSubscribed,
+	status := "unsubscribed"
+	if emailSignup.Subscribed {
+		status = "subscribed"
 	}
-	// Add member to list 123456.
-	member, err := members.New("35767", params)
+	params := &members.NewParams{}
+	params.EmailAddress = emailSignup.Email
+	params.Status = members.Status(status)
 
+	member, err := members.New("06e5278452", params)
+	if err != nil {
+		fmt.Errorf("Error with mailchimp  on email form", err, params, member)
+	}
 	respondJson("true", http.StatusOK, w)
-	fmt.Println("new member is ", member)
 	return
 
 }
