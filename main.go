@@ -43,6 +43,7 @@ func main() {
 	router.HandleFunc("/contact-form/", ContactFormHandler).Methods("POST")
 	router.HandleFunc("/email-signup/", EmailSignupHandler).Methods("POST")
 	handler := c.Handler(router)
+	log.Println("Serving on 8090")
 	log.Fatal(http.ListenAndServe(":8090", handler))
 
 }
@@ -57,7 +58,7 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(body, &contactForm)
 	if err != nil {
-		fmt.Println("Error decoding contact form form ", err)
+		log.Fatal("Error decoding contact form form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
@@ -73,7 +74,7 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 
 	member, err := members.New("7343633629", params)
 	if err != nil {
-		fmt.Errorf("Error with mailchimp on contact form", err, params, member)
+		log.Fatal("Error with mailchimp on contact form", err, params, member)
 	}
 	respondJson("true", http.StatusOK, w)
 	return
@@ -104,7 +105,7 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	member, err := members.New("06e5278452", params)
 	if err != nil {
-		fmt.Errorf("Error with mailchimp  on email form", err, params, member)
+		log.Fatal("Error with mailchimp  on email form", err, params, member)
 	}
 	respondJson("true", http.StatusOK, w)
 	return
