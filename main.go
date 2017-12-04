@@ -42,10 +42,16 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/contact-form/", ContactFormHandler).Methods("POST")
 	router.HandleFunc("/email-signup/", EmailSignupHandler).Methods("POST")
+	router.HandleFunc("/health-check/", HealthCheckHandler).Methods("GET")
 	handler := c.Handler(router)
 	log.Info("Serving on 8090")
 	log.Fatal(http.ListenAndServe(":8090", handler))
 
+}
+
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Health check"))
+	return
 }
 
 func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
