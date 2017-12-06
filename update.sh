@@ -7,5 +7,5 @@ docker push 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:l
 export NAME=kops.wallacehatch.com
 export KOPS_STATE_STORE=s3://wallace-hatch-kubernetes
 kops export kubecfg ${NAME}
-
-/usr/local/bin/kubectl set image deployment/client-deployment client-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:latest
+kubectl set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:1
+kubectl set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:latest

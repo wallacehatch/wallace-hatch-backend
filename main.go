@@ -114,7 +114,7 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error("Error with mailchimp  on email form", err, params, member)
 	}
-	log.Info("subscribed is ", params.Status)
+	log.Info("subscribed is ", params.Status, "emailSingup is", emailSignup)
 	respondJson("true", http.StatusOK, w)
 	return
 
