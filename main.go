@@ -110,11 +110,11 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 	params := &members.NewParams{}
 	params.EmailAddress = emailSignup.Email
 	params.Status = members.Status(status)
-
 	member, err := members.New("06e5278452", params)
 	if err != nil {
 		log.Error("Error with mailchimp  on email form", err, params, member)
 	}
+	log.Info("subscribed is ", params.Status)
 	respondJson("true", http.StatusOK, w)
 	return
 
