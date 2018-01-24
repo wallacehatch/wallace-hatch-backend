@@ -43,9 +43,15 @@ func main() {
 	router.HandleFunc("/contact-form/", ContactFormHandler).Methods("POST")
 	router.HandleFunc("/email-signup/", EmailSignupHandler).Methods("POST")
 	router.HandleFunc("/health-check/", HealthCheckHandler).Methods("GET")
+	router.HandleFunc("/get-all-products/", fetchAllProductsHandler).Methods("GET")
+	router.HandleFunc("/get-product/{key}", fetchProductByIdHandler).Methods("GET")
+	router.HandleFunc("/create-order/", createOrder)
+	router.HandleFunc("/test", secret)
+	router.HandleFunc("/login", login)
+	router.HandleFunc("/logout", logout)
 	handler := c.Handler(router)
-	log.Info("Serving on 8090")
-	log.Fatal(http.ListenAndServe(":8090", handler))
+	log.Info("Serving on 8080")
+	log.Fatal(http.ListenAndServe(":8081", handler))
 
 }
 

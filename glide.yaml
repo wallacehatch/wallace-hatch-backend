@@ -9,3 +9,9 @@ import:
   version: ^1.2.0
 - package: github.com/sirupsen/logrus
   version: ^1.0.3
+- package: github.com/stripe/stripe-go
+  version: ^28.10.1
+- package: github.com/gorilla/sessions
+  version: ^1.1.0
+- package: github.com/satori/go.uuid
+  version: ^1.2.0
