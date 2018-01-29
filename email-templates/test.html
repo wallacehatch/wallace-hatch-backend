@@ -1,11 +1,512 @@
-<html>
-<head>
-    <title>Testing</title>
-</head>
-<body>
-	<p>Heres your order</p>
-    {{ .FirstName}}
-    {{ .OrderNumber}}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta content="telephone=no" name="format-detection" />
+    <link href="https://fonts.googleapis.com/css?family=Cardo:400" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700" rel="stylesheet">
+    <title></title>
+    <style type="text/css" media="screen">
+        /* Linked Styles */
+        /*
+        @font-face {
+            font-family: 'Cardo', sans-serif;
+            src: url('https://s3.amazonaws.com/vest-email-assets/welcome_employee/fonts/Quicksand/Quicksand-Light.ttf')format('truetype')
+        }
+*/
+        
+        body {
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            font-family: 'Cardo', serif;
+            width: 100% !important;
+            text-align: center;
+            background: #ffffff;
+            -webkit-text-size-adjust: none;
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        a {
+            color: #666666;
+            text-decoration: none;
+        }
+        
+        a[class='click_here'] {
+            color: #000000 !important;
+        }
+        
+        a[class='email_help'] {
+            color: #02a5ff !important;
+        }
+        /* Campaign Monitor wraps the text in editor in paragraphs. In order to preserve design spacing we remove the padding/margin */
+        
+        p {
+            padding: 0 !important;
+            margin: 0 !important
+        }
+        
+        #outlook a {
+            padding: 0;
+        }
+        /* Force Outlook to provide a "view in browser" button. */
+        /* Mobile styles */
+        
+        @media only screen and (max-device-width:991px),
+        only screen and (max-width: 991px) {
+            table[class=devicewidth] {
+                width: 92%!important;
+            }
+            td[class='w12'] {
+                width: 12px !important;
+            }
+            td[class='w20'] {
+                width: 20px !important;
+            }
+            img[class='img-responsive'] {
+                width: 100% !important;
+                height: auto !important;
+                text-align: center !important;
+                display: block;
+                max-width: 100% !important;
+            }
+            img[class='img-responsive2'] {
+                width: 100% !important;
+                text-align: center !important;
+                display: block;
+                max-width: 100% !important;
+            }
+            div[class='img-center'] {
+                text-align: center !important;
+                width: 100% !important;
+            }
+            div[class='text-center'],
+            td[class='text-center'] {
+                text-align: center !important;
+            }
+            .center {
+                float: none !important;
+                margin: 0 auto !important;
+            }
+            img[class="hide"] {
+                display: none !important;
+            }
+            br[class="spacehide"],
+            td[class="hidden-xs"] {
+                display: none !important;
+            }
+        }
+        /* Mobile styles */
+        
+        @media only screen and (max-device-width: 580px),
+        only screen and (max-width: 580px) {
+            img[class='logo-width'] {
+                width: 200px !important
+            }
+            td[class='column'] {
+                float: left !important;
+                display: block !important;
+                width: 100% !important;
+                margin: auto!important;
+                margin: 5px 0 !important;
+            }
+            div[class='f12'] {
+                font-size: 12px !important;
+                text-align: left !important;
+                line-height: 18px !important;
+            }
+            div[class='f11'] {
+                font-size: 11px !important;
+                text-align: left !important;
+                line-height: 20px !important;
+            }
+            div[class='f22'] {
+                font-size: 22px !important;
+                line-height: 24px !important;
+            }
+            div[class="f24"] {
+                font-size: 24px !important;
+                line-height: 28px !important;
+                width: auto !important;
+            }
+            /*div[class="line"] { height: 20px !important; background: none !important;}*/
+            div[class="f30"] {
+                font-size: 30px !important;
+                line-height: 28px !important;
+                width: auto !important;
+                text-align: center !important;
+            }
+            div[class="heightxt"] {
+                height: 80px !important;
+            }
+            div[class="f12"] {
+                font-size: 12px !important;
+                line-height: 19px !important;
+                width: auto !important;
+            }
+            div[class="f16"] {
+                font-size: 16px !important;
+                line-height: 20px !important;
+                width: auto !important;
+                text-align: center;
+            }
+            div[class="f20"] {
+                font-size: 16px !important;
+                line-height: 24px !important;
+                width: auto !important;
+                text-align: left !important;
+            }
+            table[class=devicewidth] {
+                width: 100%!important;
+            }
+            table[class=devicewidth100] {
+                width: 100%!important;
+            }
+            td[class='w12'] {
+                width: 12px !important;
+            }
+            td[class='w20'] {
+                width: 20px !important;
+            }
+            img[class='img-responsive'] {
+                width: 100% !important;
+                display: block;
+                max-width: 100% !important;
+            }
+            div[class='img-center'] {
+                text-align: center !important;
+                width: 100% !important;
+            }
+            div[class='text-center'],
+            td[class='text-center'] {
+                text-align: center !important;
+            }
+            td[class='w10'] {
+                width: 10px !important;
+            }
+            td[class='w20'] {
+                width: 20px !important;
+            }
+            .center {
+                float: none !important;
+                margin: 0 auto !important;
+            }
+            div[class="f11"] {
+                font-size: 11px !important;
+                line-height: 19px !important;
+                width: auto !important;
+            }
+            div[class="f14"] {
+                font-size: 14px !important;
+                line-height: 19px !important;
+                width: auto !important;
+            }
+            div[class="f18"] {
+                font-size: 18px !important;
+                line-height: 19px !important;
+                width: auto !important;
+            }
+            div[class="f19"] {
+                font-size: 19px !important;
+                line-height: 22px !important;
+                width: auto !important;
+            }
+            div[class="f24"] {
+                font-size: 24px !important;
+                line-height: 28px !important;
+                width: auto !important;
+            }
+            div[class="f30"] {
+                font-size: 30px !important;
+                line-height: 19px !important;
+                width: auto !important;
+                text-align: center;
+            }
+            div[class="f40"] {
+                font-size: 40px !important;
+                line-height: 28px !important;
+                width: auto !important;
+            }
+            /* img[class="show"] {margin: 0 auto !important; width: 60%; display: block !important;  height:auto !important;text-align:center !important; max-width: 60% !important; }*/
+            span[class="f14"] {
+                font-size: 14px !important;
+                line-height: 19px !important;
+                width: auto !important;
+            }
+            div[class='top50'] {
+                margin-top: 50px !important;
+                height: 0px !important;
+            }
+            td[class='w15'] {
+                width: 15px !important;
+            }
+            .hide-td {
+                display: none !important;
+            }
+            .logo-main {
+                width: 150px !important;
+            }
+            .phone-icon {
+                width: 20px !important;
+            }
+            .help-line {
+                font-size: 20px !important;
+            }
+            .help-line2 {
+                font-size: 22px !important;
+            }
+        }
+        
+        @media (max-width: 375px) {}
+        
+        @media (max-width: 320px) {}
+    </style>
+</head>
+
+<body class="body" style="padding:0 !important; margin:0 !important; display:block !important; width:100% !important; background:#fff; -webkit-text-size-adjust:none" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
+    <!-- Header -->
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#fff" align="center" class="devicewidth">
+        <tr>
+            <td align="center" valign="top">
+                <table width="600" border="0" cellspacing="0" cellpadding="0" class="devicewidth" bgcolor="#ffffff">
+                    <tr>
+                        <td>
+
+                            <table width="100%" border="0" style="height: 74px;">
+                                <tr>
+                                    <td>
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="600" align="center" style="font-size:12px; line-height" class="column">
+                                                    <div style="display:block; font-size:0pt; line-height:0pt; height:17px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="30" style="display:block; height:17px" alt=""></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <!--                                                <td width="30"></td>-->
+
+                                                <td width="47" style="font-size:0pt; line-height:0pt; text-align:center">
+                                                    <div style="font-size:0pt; line-height:0pt;">
+                                                        <a href="#">
+                                                            <img border="0" src="https://s3.us-east-2.amazonaws.com/wallace-hatch/wh-mark.svg" mc:edit="vest-logo1" width="47" style="width:47px">
+                                                        </a>
+                                                    </div>
+                                                </td>
+
+                                                <!--                                                <td width="30"></td>-->
+                                            </tr>
+                                        </table>
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="600" align="center" style="font-size:12px; line-height" class="column">
+                                                    <div style="display:block; font-size:0pt; line-height:0pt; height:17px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="17" style="display:block; height:17px" alt=""></div>
+                                                </td>
+                                            </tr>
+
+                                        </table>
+                                        <hr>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- ==========Spacer=================== -->
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="600" align="center" style="font-size:0; line-height" class="column">
+                                        <div style="display:block; font-size:0pt; line-height:0pt; height:30px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="30" style="display:block; height:30px" alt=""></div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="540">
+                                        <div mc:edit="body-text2" style="font-family: Quicksand, sans-serif;font-size: 18px;line-height: 1.33;letter-spacing: 0.2px;text-align: center;color: #1e1f21;">
+                                            Hi Zachary
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            </table>
+                            <!-- ==========Spacer=================== -->
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="600" align="center" style="font-size:0; line-height" class="column">
+                                        <div style="display:block; font-size:0pt; line-height:0pt; height:10px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="30px" style="display:block; height:30px" alt=""></div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <!-- ==========Spacer=================== -->
+
+                            <!-- ==========End Spacer=================== -->
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="30"></td>
+                                    <td width="540">
+                                        <div mc:edit="personal-finance" style="font-size: 14px;line-height: 1.71;letter-spacing: 0.2px;color: #1e1f21; text-align: center;">
+                                            Thank you for your order
+                                        </div>
+                                    </td>
+                                    <td width="30"></td>
+                                </tr>
+                            </table>
+                            <!-- ==========Spacer=================== -->
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="600" align="center" style="font-size:12px; line-height" class="column">
+                                        <div style="display:block; font-size:0pt; line-height:0pt; height:20px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="20" style="display:block; height:20px" alt=""></div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <!-- ==========End Spacer=================== -->
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="30"></td>
+                                    <td width="200">
+                                        <div mc:edit="personal-finance" style="font-size: 14px;line-height: 1.71;letter-spacing: 0.2px;color: #1e1f21; text-align: center;">
+                                            Your order: 1234567890000 has been received.<br> We’ll let you know when it’s on it’s way.
+                                        </div>
+                                    </td>
+                                    <td width="30"></td>
+                                </tr>
+                            </table>
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="600" align="center" style="font-size:12px; line-height" class="column">
+                                        <div style="display:block; font-size:0pt; line-height:0pt; height:30px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="30" style="display:block; height:30px" alt=""></div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="40" align="center" style="font-size:12px; line-height" class="column">
+                                        <div style="display:block; font-size:0pt; line-height:0pt; height:2px; width: 40px; background-color: black;"></div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="600" align="center" style="font-size:12px; line-height" class="column">
+                                        <div style="display:block; font-size:0pt; line-height:0pt; height:30px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="30" style="display:block; height:30px" alt=""></div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#edeef0">
+                                <tr>
+                                    <td>
+                                        <!-- ==========Spacer=================== -->
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="600" align="center" style="font-size:12px; line-height" class="column">
+                                                    <div style="display:block; font-size:0pt; line-height:0pt; height:10px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="10" style="display:block; height:10px" alt=""></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- ==========End Spacer=================== -->
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="11" class="hide-td"></td>
+                                                <td width="316" class="column">
+                                                    <div mc:edit="link" class="text-center" style="font-size: 12px;color: #2f3032;line-height: 1.83;text-align: left;">
+                                                        <a href="#" style="color:#2f3032">Terms & conditions</a>&nbsp;&nbsp;
+                                                        <a href="#" style="color:#2f3032">Privacy policy</a>&nbsp;&nbsp;
+                                                        <a href="#" style="color:#2f3032">Unsubscribe</a>
+                                                    </div>
+                                                </td>
+                                                <td width="80" class="hide-td"></td>
+                                                <td width="182" class="column">
+                                                    <div mc:edit="copyright" class="text-center" style="font-size: 12px;color: #2f3032;line-height: 1.83;text-align: right;">
+                                                        © copyright 2017 VEST, LLC
+                                                    </div>
+                                                </td>
+                                                <td width="11" class="hide-td"></td>
+                                            </tr>
+                                        </table>
+                                        <!-- ==========Spacer=================== -->
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="600" align="center" style="font-size:0; line-height" class="column">
+                                                    <div style="display:block; font-size:0pt; line-height:0pt; height:26px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="26" style="display:block; height:26px" alt=""></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- ==========End Spacer=================== -->
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="11"></td>
+                                                <td width="80" class="column">
+                                                    <div style="font-size:0pt; line-height:0pt;display:block;text-align:left">
+                                                        <a href="#">
+                                                            <img border="0" src="https://s3.amazonaws.com/vest-email-assets/welcome_employee/fullcolor-vest-logo%403x.png" mc:edit="vest-logo" width="80" style="width:80px;text-align:left">
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td width="327" class="hide-td"></td>
+                                                <td width="171">
+                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                                        <tr>
+                                                            <td width="21">
+                                                                <div style="font-size:0pt; line-height:0pt;display:block;text-align:center">
+                                                                    <a href="#">
+                                                                        <img border="0" src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/instagram.png" mc:edit="instagram" width="21" style="width:21px;text-align:center">
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                            <td width="32"></td>
+                                                            <td width="12">
+                                                                <div style="font-size:0pt; line-height:0pt;display:block;text-align:center">
+                                                                    <a href="#">
+                                                                        <img border="0" src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/facebook.png" mc:edit="facebook" width="12" style="width:12px;text-align:center">
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                            <td width="32"></td>
+                                                            <td width="21">
+                                                                <div style="font-size:0pt; line-height:0pt;display:block;text-align:center">
+                                                                    <a href="#">
+                                                                        <img border="0" src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/twitter.png" mc:edit="twitter" width="21" style="width:21px;text-align:center">
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                            <td width="32"></td>
+                                                            <td width="21">
+                                                                <div style="font-size:0pt; line-height:0pt;display:block;text-align:center">
+                                                                    <a href="#">
+                                                                        <img border="0" src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/linkedin.png" mc:edit="linked-in" width="21" style="width:21px;text-align:center">
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                <td width="11"></td>
+                                            </tr>
+                                        </table>
+                                        <!-- ==========Spacer=================== -->
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="600" align="center" style="font-size:0; line-height" class="column">
+                                                    <div style="display:block; font-size:0pt; line-height:0pt; height:26px"><img src="http://dhruphost.com/mysite/email-templet/dhsep2017_151/empty.gif" width="1" height="26" style="display:block; height:26px" alt=""></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- ==========End Spacer=================== -->
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
 </body>
+
 </html>
