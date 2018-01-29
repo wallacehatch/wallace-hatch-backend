@@ -44,24 +44,26 @@ func StripeWebhookHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func orderUpdatedEvent(event stripe.Event) {
-	statusTransitions, ok := event.Data.Prev["status_transitions"].(map[string]interface{})
-	if !ok {
-		fmt.Println("order has no status tranditions")
-	}
-	fulfiledChange, ok := statusTransitions["fulfiled"]
-	if ok {
-		fmt.Println("orders fulfillment updated!", fulfiledChange)
-		orderShippedEmail(event)
-	}
-
+	constructEmailInformation(event)
+	// statusTransitions, ok := event.Data.Prev["status_transitions"].(map[string]interface{})
+	// if !ok {
+	// 	fmt.Println("order has no status tranditions")
+	// }
+	// fulfiledChange, ok := statusTransitions["fulfiled"]
+	// if ok {
+	// 	fmt.Println("orders fulfillment updated!", fulfiledChange)
+	// 	orderShippedEmail(event)
+	// }
 }
 
 func orderConfirmationEmail(event stripe.Event) {
 	fmt.Println("order was paid for successfully, time to email!")
+	constructEmailInformation(event)
 
 }
 
 func orderShippedEmail(event stripe.Event) {
 	fmt.Println("gonna send email for shipping")
+	constructEmailInformation(event)
 
 }

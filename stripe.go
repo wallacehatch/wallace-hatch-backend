@@ -12,6 +12,7 @@ import (
 	customer "github.com/stripe/stripe-go/customer"
 	order "github.com/stripe/stripe-go/order"
 	product "github.com/stripe/stripe-go/product"
+	sku "github.com/stripe/stripe-go/sku"
 	"net/http"
 	"os"
 	"strings"
@@ -74,6 +75,14 @@ func fetchOrCreateCustomer(email string) *stripe.Customer {
 
 }
 
+func fetchProductBySku(skuId string) stripe.SKU {
+	s, err := sku.Get(skuId, nil)
+	if err != nil {
+		fmt.Println("Error fetching by sku ", err)
+	}
+	return *s
+}
+
 func getOrder(orderId string) (*stripe.Order, error) {
 	o, err := order.Get(orderId, nil)
 	return o, err
@@ -82,6 +91,29 @@ func getOrder(orderId string) (*stripe.Order, error) {
 
 type idsReqeust struct {
 	Ids []string `json:"product_ids"`
+}
+
+func fetchCustomerFromId(customerId string) stripe.Customer {
+	c, _ := customer.Get(customerId, nil)
+	return *c
+}
+
+func fetchCard(customerId string, cardId string) stripe.Card {
+	c, _ := card.Get(
+		cardId,
+		&stripe.CardParams{Customer: customerId},
+	)
+	return *c
+
+}
+
+func fetchDefaultCard(customerId string) stripe.Card {
+	c, _ := card.Get(
+		"card_1BpiApGPb2UAQvIIulZ82rdM",
+		&stripe.CardParams{Customer: "cus_CEAV0uH4PaskMF"},
+	)
+	return *c
+
 }
 
 func fetchProductsByIds(w http.ResponseWriter, r *http.Request) {

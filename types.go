@@ -51,7 +51,73 @@ type Email struct {
 	PlainText string `json:"plain_text" bson:"plain_text"`
 }
 
-type EmailInformation struct {
-	FirstName string
-	Company   string
+type EmailItemInformation struct {
+	Name     string
+	Size     string
+	Color    string
+	Style    string
+	ImageUrl string
+	Quantity int
 }
+
+type EmailShippingInformation struct {
+	Address          string
+	City             string
+	State            string
+	Zip              string
+	TrackingNumber   string
+	TrackingCarrier  string
+	EstimatedArrival string // dont need to get fancy ,just set to 4-7 days for now
+
+}
+
+type EmailInformation struct {
+	To          string
+	From        string
+	FirstName   string
+	OrderNumber string
+	OrderDate   string
+	OrderTotal  float64
+	Items       []EmailItemInformation
+	CardType    string
+	CardMask    string
+	Shipping    EmailShippingInformation
+}
+
+// // Event is the resource representing a Stripe event.
+// // For more details see https://stripe.com/docs/api#events.
+// type Event struct {
+// 	Account  string        `json:"account"`
+// 	Created  int64         `json:"created"`
+// 	Data     *EventData    `json:"data"`
+// 	ID       string        `json:"id"`
+// 	Live     bool          `json:"livemode"`
+// 	Request  *EventRequest `json:"request"`
+// 	Type     string        `json:"type"`
+// 	Webhooks uint64        `json:"pending_webhooks"`
+// }
+
+// // EventRequest contains information on a request that created an event.
+// type EventRequest struct {
+// 	// ID is the request ID of the request that created an event, if the event
+// 	// was created by a request.
+// 	ID string `json:"id"`
+
+// 	// IdempotencyKey is the idempotency key of the request that created an
+// 	// event, if the event was created by a request and if an idempotency key
+// 	// was specified for that request.
+// 	IdempotencyKey string `json:"idempotency_key"`
+// }
+
+// // EventData is the unmarshalled object as a map.
+// type EventData struct {
+// 	Obj  map[string]interface{}
+// 	Prev map[string]interface{} `json:"previous_attributes"`
+// 	Raw  json.RawMessage        `json:"object"`
+// }
+
+// // EventList is a list of events as retrieved from a list endpoint.
+// type EventList struct {
+// 	ListMeta
+// 	Values []*Event `json:"data"`
+// }
