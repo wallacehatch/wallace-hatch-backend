@@ -44,14 +44,13 @@ func main() {
 	router.HandleFunc("/email-signup/", EmailSignupHandler).Methods("POST")
 	router.HandleFunc("/health-check/", HealthCheckHandler).Methods("GET")
 	router.HandleFunc("/get-all-products/", fetchAllProductsHandler).Methods("GET")
+	router.HandleFunc("/get-products/", fetchProductsByIds).Methods("POST")
 	router.HandleFunc("/get-product/{key}", fetchProductByIdHandler).Methods("GET")
-	router.HandleFunc("/create-order/", createOrder)
-	router.HandleFunc("/test", secret)
-	router.HandleFunc("/login", login)
-	router.HandleFunc("/logout", logout)
+	router.HandleFunc("/submit-order/", submitOrder).Methods("POST")
 	handler := c.Handler(router)
-	log.Info("Serving on 8080")
-	log.Fatal(http.ListenAndServe(":8081", handler))
+	port := ":8081"
+	log.Info("Serving on ", port)
+	log.Fatal(http.ListenAndServe(port, handler))
 
 }
 
