@@ -15,3 +15,5 @@ import:
   version: ^1.1.0
 - package: github.com/satori/go.uuid
   version: ^1.2.0
+- package: gopkg.in/mailgun/mailgun-go.v1
+  version: ^1.1.0

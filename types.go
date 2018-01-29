@@ -42,3 +42,16 @@ type completeOrderRequest struct {
 	Shipping shippingRequest `json:"shipping"`
 	Coupon   string          `json:"coupon"`
 }
+
+type Email struct {
+	From      string `json:"from" bson:"from"`
+	To        string `json:"to" bson:"to"`
+	Subject   string `json:"subject" bson:"subject"`
+	Html      string `json:"html" bson:"html"`
+	PlainText string `json:"plain_text" bson:"plain_text"`
+}
+
+type EmailInformation struct {
+	FirstName string
+	Company   string
+}

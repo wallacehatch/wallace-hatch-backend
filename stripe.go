@@ -7,6 +7,7 @@ import (
 	// log "github.com/sirupsen/logrus".
 	"github.com/stripe/stripe-go"
 	card "github.com/stripe/stripe-go/card"
+	coupon "github.com/stripe/stripe-go/coupon"
 	currency "github.com/stripe/stripe-go/currency"
 	customer "github.com/stripe/stripe-go/customer"
 	order "github.com/stripe/stripe-go/order"
@@ -167,6 +168,19 @@ func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) strip
 	return mappedCard
 }
 
+func fetchCoupon(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	c, err := coupon.Get(vars["key"], nil)
+	js, err := json.Marshal(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
+}
+
 // create customer, create card, create order, pay order
 func submitOrder(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
@@ -182,6 +196,6 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 	stripeOrderParams := mapToStripeOrderParams(orderRequest.Order, orderRequest.Shipping, customer.ID, orderRequest.Coupon)
 	newOrder, err := order.New(stripeOrderParams)
 	success, err := payOrder(newOrder.ID, customer.ID)
-	fmt.Println(err)
+	fmt.Println(success, err)
 
 }

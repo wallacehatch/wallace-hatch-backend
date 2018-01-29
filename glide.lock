@@ -1,5 +1,5 @@
-hash: 2c3c300a06e960a2e1cdc85139b92385324dd6bbaebc3f53f478b5160e893c2e
-updated: 2018-01-24T16:40:48.07524-05:00
+hash: b1e956e488708b93e39e71c2b92c2a7a0d6f95ae5d793420ba2ab4d957675e4a
+updated: 2018-01-29T10:52:42.640546-05:00
 imports:
 - name: github.com/beeker1121/mailchimp-go
   version: 7c5f827423b2a08c0cb05f6a79ea9fec1d2eb257
@@ -10,10 +10,10 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 53c1911da2b537f792e7cafcb446b05ffe33b996
-- name: github.com/gorilla/securecookie
-  version: e59506cc896acb7f7bf732d4fdf5e25f7ccd8983
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
+- name: github.com/pkg/errors
+  version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
 - name: github.com/rs/cors
   version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 - name: github.com/satori/go.uuid
@@ -23,10 +23,15 @@ imports:
 - name: github.com/stripe/stripe-go
   version: 918a5726870d136e7dd8d973d46922b0bd07192d
   subpackages:
+  - card
+  - coupon
+  - currency
   - customer
   - form
+  - order
   - orderitem
   - product
+  - webhook
 - name: golang.org/x/crypto
   version: bd6f299fb381e4c3393d1c4b1f0b94f5e77650c8
   subpackages:
@@ -36,4 +41,6 @@ imports:
   subpackages:
   - unix
   - windows
+- name: gopkg.in/mailgun/mailgun-go.v1
+  version: a4002e2df2e8ca2da6a6fbb4a72871b504e49f50
 testImports: []
