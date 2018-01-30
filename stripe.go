@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	// log "github.com/sirupsen/logrus".
 	"github.com/stripe/stripe-go"
 	card "github.com/stripe/stripe-go/card"
 	coupon "github.com/stripe/stripe-go/coupon"
@@ -16,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	// "time"
 )
 
 func init() {
@@ -57,7 +55,8 @@ func fetchProductByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func fetchOrCreateCustomer(email string) *stripe.Customer {
+func fetchOrCreateCustomer(email string) (*stripe.Customer, error) {
+	var err error
 	currentCustomer := &stripe.Customer{}
 	params := &stripe.CustomerListParams{}
 	params.Filters.AddFilter("email", "", email)
@@ -69,22 +68,28 @@ func fetchOrCreateCustomer(email string) *stripe.Customer {
 		customerParams := &stripe.CustomerParams{
 			Email: email,
 		}
-		currentCustomer, _ = customer.New(customerParams)
+		currentCustomer, err = customer.New(customerParams)
+		if err != nil {
+			logger.Error("Error creating customer from params", err)
+		}
 	}
-	return currentCustomer
+	return currentCustomer, err
 
 }
 
-func fetchProductBySku(skuId string) stripe.SKU {
+func fetchProductBySku(skuId string) (stripe.SKU, error) {
 	s, err := sku.Get(skuId, nil)
 	if err != nil {
-		fmt.Println("Error fetching by sku ", err)
+		logger.Error("Error fetching sku from id", err)
 	}
-	return *s
+	return *s, err
 }
 
 func getOrder(orderId string) (*stripe.Order, error) {
 	o, err := order.Get(orderId, nil)
+	if err != nil {
+		logger.Error("Error fetching order from id", err)
+	}
 	return o, err
 
 }
@@ -93,26 +98,35 @@ type idsReqeust struct {
 	Ids []string `json:"product_ids"`
 }
 
-func fetchCustomerFromId(customerId string) stripe.Customer {
-	c, _ := customer.Get(customerId, nil)
-	return *c
+func fetchCustomerFromId(customerId string) (stripe.Customer, error) {
+	c, err := customer.Get(customerId, nil)
+	if err != nil {
+		logger.Error("Error fetching customer from id ", err)
+	}
+	return *c, err
 }
 
-func fetchCard(customerId string, cardId string) stripe.Card {
-	c, _ := card.Get(
+func fetchCard(customerId string, cardId string) (stripe.Card, error) {
+	c, err := card.Get(
 		cardId,
 		&stripe.CardParams{Customer: customerId},
 	)
-	return *c
+	if err != nil {
+		logger.Error("Error fetching card", err)
+	}
+	return *c, err
 
 }
 
-func fetchDefaultCard(customerId string) stripe.Card {
-	c, _ := card.Get(
+func fetchDefaultCard(customerId string) (stripe.Card, error) {
+	c, err := card.Get(
 		"card_1BpiApGPb2UAQvIIulZ82rdM",
 		&stripe.CardParams{Customer: "cus_CEAV0uH4PaskMF"},
 	)
-	return *c
+	if err != nil {
+		logger.Error("Error fetching default card", err)
+	}
+	return *c, err
 
 }
 
@@ -151,6 +165,10 @@ func payOrder(orderId string, customerId string) (*stripe.Order, error) {
 		orderId,
 		orderPayParams,
 	)
+	if err != nil {
+		logger.Error("Error paying order", err)
+	}
+
 	return o, err
 }
 
@@ -189,9 +207,15 @@ func mapToStripeCustomer(account accountRequest) stripe.Customer {
 }
 
 func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) stripe.CardParams {
+	logger.Info(cardInfo)
 	mappedCard := stripe.CardParams{}
 	mappedCard.Number = cardInfo.Number
 	dateSplit := strings.Split(cardInfo.Exp, "/")
+
+	if len(dateSplit) < 1 {
+		logger.Error("date not in correct format", cardInfo.Exp)
+		return mappedCard
+	}
 	year := fmt.Sprint("20", dateSplit[1])
 	mappedCard.Month = dateSplit[0]
 	mappedCard.Year = year
@@ -205,6 +229,7 @@ func fetchCoupon(w http.ResponseWriter, r *http.Request) {
 	c, err := coupon.Get(vars["key"], nil)
 	js, err := json.Marshal(c)
 	if err != nil {
+		logger.Error("Error decoding order request default card", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -213,21 +238,64 @@ func fetchCoupon(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type ResponseError struct {
+	Error  error `json:"error"`
+	Status int   `json:"status"`
+}
+
+func respondErrorJson(err error, status int, w http.ResponseWriter) {
+
+	response := ResponseError{Error: err, Status: status}
+
+	jsonResponse, jsErr := json.Marshal(response)
+	if jsErr != nil {
+		http.Error(w, err.Error(), status)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(jsonResponse)
+}
+
 // create customer, create card, create order, pay order
 func submitOrder(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var orderRequest completeOrderRequest
 	err := decoder.Decode(&orderRequest)
 	if err != nil {
-		fmt.Println("ERROR", err)
+		logger.Error("Error decoding order request default card", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	customer := fetchOrCreateCustomer(orderRequest.Account.Email)
+	customer, err := fetchOrCreateCustomer(orderRequest.Account.Email)
+	if err != nil {
+		logger.Error("Error creating customer ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
 	stripeCardParams := mapToStripeCardParams(orderRequest.Card, *customer)
 	_, err = card.New(&stripeCardParams)
+	if err != nil {
+		logger.Error("Error creating card ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+
+		return
+	}
 	stripeOrderParams := mapToStripeOrderParams(orderRequest.Order, orderRequest.Shipping, customer.ID, orderRequest.Coupon)
 	newOrder, err := order.New(stripeOrderParams)
-	success, err := payOrder(newOrder.ID, customer.ID)
-	fmt.Println(success, err)
+	if err != nil {
+		logger.Error("Error creating order ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	_, err = payOrder(newOrder.ID, customer.ID)
+	if err != nil {
+		logger.Error("Error paying for order ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	respondJson("success", http.StatusAccepted, w)
+	return
 
 }

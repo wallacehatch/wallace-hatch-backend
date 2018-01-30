@@ -42,8 +42,8 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 		fmt.Println("no customer id ")
 		customerId = "cus_CE6XPDfGQouohF"
 	}
-	stripeCustomer := fetchCustomerFromId(customerId)
-	card := fetchCard(customerId, stripeCustomer.DefaultSource.ID)
+	stripeCustomer, _ := fetchCustomerFromId(customerId)
+	card, _ := fetchCard(customerId, stripeCustomer.DefaultSource.ID)
 
 	emailInfo.To = stripeCustomer.Email
 	emailInfo.CardMask = card.LastFour
@@ -66,7 +66,7 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 			emailItem := EmailItemInformation{}
 			productId, ok := itemMap["parent"].(string)
 			if ok {
-				skuInfo := fetchProductBySku(productId)
+				skuInfo, _ := fetchProductBySku(productId)
 				emailItem.ImageUrl = skuInfo.Image
 				fmt.Println(skuInfo)
 			}

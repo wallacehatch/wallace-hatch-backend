@@ -26,10 +26,12 @@ type EmailSignup struct {
 }
 
 var mailchimpAPIKey string
+var logger *log.Logger
 
 func init() {
-	log.SetFormatter(&log.JSONFormatter{})
 	mailchimpAPIKey = os.Getenv("MAILCHIMP_API")
+	logger = log.New()
+	logger.Formatter = new(log.JSONFormatter)
 }
 
 func main() {
@@ -51,8 +53,8 @@ func main() {
 	router.HandleFunc("/stripe-webhook", StripeWebhookHandler)
 	handler := c.Handler(router)
 	port := ":8081"
-	log.Info("Serving on ", port)
-	log.Fatal(http.ListenAndServe(port, handler))
+	logger.Info("Serving on ", port)
+	logger.Fatal(http.ListenAndServe(port, handler))
 
 }
 
@@ -66,13 +68,13 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 	contactForm := ContactForm{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Error("Error in body form ", err)
+		logger.Error("Error in body form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
 	err = json.Unmarshal(body, &contactForm)
 	if err != nil {
-		log.Error("Error decoding contact form form ", err)
+		logger.Error("Error decoding contact form form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
@@ -88,7 +90,7 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 
 	member, err := members.New("7343633629", params)
 	if err != nil {
-		log.Error("Error with mailchimp on contact form", err, params, member)
+		logger.Error("Error with mailchimp on contact form", err, params, member)
 	}
 	respondJson("true", http.StatusOK, w)
 	return
@@ -100,13 +102,13 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 	emailSignup := EmailSignup{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Error("Error in body  of email signup form ", err)
+		logger.Error("Error in body  of email signup form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
 	err = json.Unmarshal(body, &emailSignup)
 	if err != nil {
-		log.Error("Error decoding email singup form ", err)
+		logger.Error("Error decoding email singup form ", err)
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
@@ -119,9 +121,9 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 	params.Status = members.Status(status)
 	member, err := members.New("06e5278452", params)
 	if err != nil {
-		log.Error("Error with mailchimp  on email form", err, params, member)
+		logger.Error("Error with mailchimp  on email form", err, params, member)
 	}
-	log.Info("subscribed is ", params.Status, "emailSingup is", emailSignup)
+	logger.Info("subscribed is ", params.Status, "emailSingup is", emailSignup)
 	respondJson("true", http.StatusOK, w)
 	return
 
