@@ -49,10 +49,11 @@ func main() {
 	router.HandleFunc("/get-products/", fetchProductsByIds).Methods("POST")
 	router.HandleFunc("/get-product/{key}", fetchProductByIdHandler).Methods("GET")
 	router.HandleFunc("/submit-order/", submitOrder).Methods("POST")
+	router.HandleFunc("/create-customer/", createCustomer).Methods("POST")
 	router.HandleFunc("/get-coupon/{key}", fetchCoupon)
 	router.HandleFunc("/stripe-webhook", StripeWebhookHandler)
 	handler := c.Handler(router)
-	port := ":8081"
+	port := ":8090"
 	logger.Info("Serving on ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
 

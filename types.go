@@ -1,10 +1,11 @@
 package main
 
 type accountRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Phone    string `json:"phone"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	Phone       string `json:"phone"`
+	AcceptTerms bool   `json:"acceptTerms"`
 }
 
 type cardRequest struct {

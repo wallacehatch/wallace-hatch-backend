@@ -1,0 +1,13 @@
+api:
+  restart: always
+  build: ./docker
+  expose:
+    - "8090"
+
+nginx:
+  restart: always
+  build: ./nginx
+  ports:
+    - "80:80"
+  links:
+    - api:api

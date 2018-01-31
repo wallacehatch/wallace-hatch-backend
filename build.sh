@@ -1,7 +1,7 @@
-env GOOS=linux go build -o main .
+env GOOS=linux go build -o docker/main .
 
 
-docker-machine create --driver amazonec2 --amazonec2-instance-type t2.medium --engine-install-url=https://web.archive.org/web/20170623081500/https://get.docker.com name
+docker-machine create --driver amazonec2 --amazonec2-instance-type t2.micro --engine-install-url=https://web.archive.org/web/20170623081500/https://get.docker.com wallace-hatch-backend
 
 
 docker stop $(docker ps -a -q)

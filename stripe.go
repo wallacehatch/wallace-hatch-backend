@@ -14,6 +14,7 @@ import (
 	sku "github.com/stripe/stripe-go/sku"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -202,7 +203,7 @@ func mapToStripeOrderParams(currentOrder orderRequest, currentShipping shippingR
 func mapToStripeCustomer(account accountRequest) stripe.Customer {
 	mappedCustomer := stripe.Customer{}
 	mappedCustomer.Email = account.Email
-	mappedCustomer.Meta = map[string]string{"name": account.Name}
+	mappedCustomer.Meta = map[string]string{"name": account.Name, "allowTexting": strconv.FormatBool(account.AcceptTerms)}
 	return mappedCustomer
 }
 
@@ -227,12 +228,13 @@ func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) strip
 func fetchCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	c, err := coupon.Get(vars["key"], nil)
-	js, err := json.Marshal(c)
 	if err != nil {
 		logger.Error("Error decoding order request default card", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
+
+	js, err := json.Marshal(c)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 
@@ -241,6 +243,15 @@ func fetchCoupon(w http.ResponseWriter, r *http.Request) {
 type ResponseError struct {
 	Error  error `json:"error"`
 	Status int   `json:"status"`
+}
+
+func fetchCouponById(couponId string) (stripe.Coupon, error) {
+	c, err := coupon.Get(couponId, nil)
+	if err != nil {
+		logger.Error("Error retreiving coupon ", err)
+	}
+	return *c, err
+
 }
 
 func respondErrorJson(err error, status int, w http.ResponseWriter) {
@@ -258,13 +269,52 @@ func respondErrorJson(err error, status int, w http.ResponseWriter) {
 	w.Write(jsonResponse)
 }
 
+func createCustomer(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var orderRequest completeOrderRequest
+	err := decoder.Decode(&orderRequest)
+	if err != nil {
+		logger.Error("Error decoding order request", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+
+	customer, err := fetchOrCreateCustomer(orderRequest.Account.Email)
+	if err != nil {
+		logger.Error("Error creating customer ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	stripeCardParams := mapToStripeCardParams(orderRequest.Card, *customer)
+	_, err = card.New(&stripeCardParams)
+	if err != nil {
+		logger.Error("Error creating card ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+
+	if orderRequest.Coupon != "" {
+		_, err := fetchCouponById(orderRequest.Coupon)
+		if err != nil {
+			logger.Error("Error with coupon", err)
+			respondErrorJson(err, http.StatusBadRequest, w)
+			return
+		}
+	}
+
+	respondJson("success", http.StatusAccepted, w)
+	return
+
+}
+
 // create customer, create card, create order, pay order
 func submitOrder(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var orderRequest completeOrderRequest
 	err := decoder.Decode(&orderRequest)
 	if err != nil {
-		logger.Error("Error decoding order request default card", err)
+		logger.Error("Error decoding order request", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
