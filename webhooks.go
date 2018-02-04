@@ -1,15 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/webhook"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 )
 
 var stripeWebhookSig string
+
+var b bytes.Buffer
 
 func init() {
 
@@ -45,6 +49,7 @@ func StripeWebhookHandler(w http.ResponseWriter, r *http.Request) {
 
 func orderUpdatedEvent(event stripe.Event) {
 	constructEmailInformation(event)
+
 	// statusTransitions, ok := event.Data.Prev["status_transitions"].(map[string]interface{})
 	// if !ok {
 	// 	fmt.Println("order has no status tranditions")
@@ -58,7 +63,19 @@ func orderUpdatedEvent(event stripe.Event) {
 
 func orderConfirmationEmail(event stripe.Event) {
 	fmt.Println("order was paid for successfully, time to email!")
-	constructEmailInformation(event)
+	bufferBytes := bytes.Buffer{}
+
+	emailInfo := constructEmailInformation(event)
+	tmpl, err := template.ParseFiles("email-templates/test.html")
+	if err != nil {
+		logger.Error("error opening template ", err)
+
+	}
+	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
+		logger.Error("error executing html ", err)
+
+	}
+	fmt.Println(bufferBytes.String())
 
 }
 

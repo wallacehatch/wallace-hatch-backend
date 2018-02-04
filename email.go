@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/stripe/stripe-go"
 	"gopkg.in/mailgun/mailgun-go.v1"
@@ -15,8 +14,6 @@ var mailgunApiSecretKey string
 var mailgunPublicKey string
 var domain string
 var emailSender string
-
-var b bytes.Buffer
 
 func init() {
 	mailgunApiSecretKey = os.Getenv("MAILGUN_API_SECRET_KEY")
@@ -68,7 +65,7 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 			if ok {
 				skuInfo, _ := fetchProductBySku(productId)
 				emailItem.ImageUrl = skuInfo.Image
-				fmt.Println(skuInfo)
+				emailItem.Price = skuInfo.Price
 			}
 
 			emailItem.Name = itemMap["description"].(string)
@@ -92,8 +89,8 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 
 	firstName, _ := nameParser(stripeCustomerName)
 	emailInfo.FirstName = firstName
-	emailInfo.OrderNumber = orderObject["id"].(string)
-	emailInfo.OrderTotal = orderObject["amount"].(float64)
+	emailInfo.OrderNumber = strings.Replace(orderObject["id"].(string), "or_", "", -1)
+	emailInfo.OrderTotal = orderObject["amount"].(float64) / 100.0
 
 	return emailInfo
 

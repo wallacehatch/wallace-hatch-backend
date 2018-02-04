@@ -329,7 +329,6 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error("Error creating card ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
-
 		return
 	}
 	stripeOrderParams := mapToStripeOrderParams(orderRequest.Order, orderRequest.Shipping, customer.ID, orderRequest.Coupon)
@@ -339,13 +338,15 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	_, err = payOrder(newOrder.ID, customer.ID)
+	order, err := payOrder(newOrder.ID, customer.ID)
 	if err != nil {
 		logger.Error("Error paying for order ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	respondJson("success", http.StatusAccepted, w)
+	js, err := json.Marshal(order)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 	return
 
 }

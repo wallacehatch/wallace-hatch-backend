@@ -59,6 +59,7 @@ type EmailItemInformation struct {
 	Style    string
 	ImageUrl string
 	Quantity int
+	Price    int64
 }
 
 type EmailShippingInformation struct {
