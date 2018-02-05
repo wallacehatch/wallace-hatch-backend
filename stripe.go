@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/stripe/stripe-go"
@@ -215,22 +216,22 @@ func mapToStripeCustomer(account accountRequest) stripe.Customer {
 	return mappedCustomer
 }
 
-func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) stripe.CardParams {
+func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) (stripe.CardParams, error) {
 	logger.Info(cardInfo)
 	mappedCard := stripe.CardParams{}
 	mappedCard.Number = cardInfo.Number
 	dateSplit := strings.Split(cardInfo.Exp, "/")
-
-	if len(dateSplit) < 1 {
+	if (len(dateSplit) < 1) || (len(cardInfo.Exp) < 1) {
 		logger.Error("date not in correct format", cardInfo.Exp)
-		return mappedCard
+
+		return mappedCard, errors.New("Date for credit card not in format MM/YY")
 	}
 	year := fmt.Sprint("20", dateSplit[1])
 	mappedCard.Month = dateSplit[0]
 	mappedCard.Year = year
 	mappedCard.CVC = cardInfo.CVC
 	mappedCard.Customer = customer.ID
-	return mappedCard
+	return mappedCard, nil
 }
 
 func fetchCoupon(w http.ResponseWriter, r *http.Request) {
@@ -249,8 +250,9 @@ func fetchCoupon(w http.ResponseWriter, r *http.Request) {
 }
 
 type ResponseError struct {
-	Error  error `json:"error"`
-	Status int   `json:"status"`
+	ErrorMsg string `json:"error_message"`
+
+	Status int `json:"status"`
 }
 
 func fetchCouponById(couponId string) (stripe.Coupon, error) {
@@ -264,17 +266,18 @@ func fetchCouponById(couponId string) (stripe.Coupon, error) {
 
 func respondErrorJson(err error, status int, w http.ResponseWriter) {
 
-	response := ResponseError{Error: err, Status: status}
-
+	response := ResponseError{ErrorMsg: err.Error(), Status: status}
 	jsonResponse, jsErr := json.Marshal(response)
 	if jsErr != nil {
-		http.Error(w, err.Error(), status)
+		logger.Error("Error with json response for error message", jsErr)
+		http.Error(w, jsErr.Error(), status)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(jsonResponse)
+	return
+
 }
 
 func createCustomer(w http.ResponseWriter, r *http.Request) {
@@ -294,7 +297,14 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	stripeCardParams := mapToStripeCardParams(orderRequest.Card, *customer)
+	stripeCardParams, err := mapToStripeCardParams(orderRequest.Card, *customer)
+
+	if err != nil {
+		logger.Error("Error mapping to card card ", err)
+
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
 	_, err = card.New(&stripeCardParams)
 	if err != nil {
 		logger.Error("Error creating card ", err)
@@ -332,7 +342,12 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	stripeCardParams := mapToStripeCardParams(orderRequest.Card, *customer)
+	stripeCardParams, err := mapToStripeCardParams(orderRequest.Card, *customer)
+	if err != nil {
+		logger.Error("Error creating card ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
 	_, err = card.New(&stripeCardParams)
 	if err != nil {
 		logger.Error("Error creating card ", err)
