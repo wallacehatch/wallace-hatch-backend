@@ -67,6 +67,10 @@ func fetchOrCreateCustomer(email string) (*stripe.Customer, error) {
 		currentCustomer = i.Customer()
 	}
 	if currentCustomer.ID == "" {
+		if email == "" {
+			logger.Error("No email provided")
+			return currentCustomer, errors.New("No email provided")
+		}
 		customerParams := &stripe.CustomerParams{
 			Email: email,
 		}
@@ -196,24 +200,33 @@ func mapToStripeOrderParams(currentOrder orderRequest, currentShipping shippingR
 	}
 
 	for _, item := range currentOrder.Items {
+
 		quant := int64(item.Quantity)
-		stripeItem := &stripe.OrderItemParams{Type: "sku", Parent: item.SKU, Quantity: &quant}
-		orderItemParams = append(orderItemParams, stripeItem)
+		if quant > 0 {
+			fmt.Println("quantity is ", quant)
+			stripeItem := &stripe.OrderItemParams{Type: "sku", Parent: item.SKU, Quantity: &quant}
+			orderItemParams = append(orderItemParams, stripeItem)
+		}
 
 	}
 	mappedOrder.Items = orderItemParams
 	mappedOrder.Shipping = &stripe.ShippingParams{Name: currentShipping.Name, Address: address}
 	mappedOrder.Customer = customerId
 	mappedOrder.Coupon = coupon
+	fmt.Println("MAPPED ORDER", mappedOrder)
 
 	return mappedOrder
 }
 
-func mapToStripeCustomer(account accountRequest) stripe.Customer {
+func mapToStripeCustomer(account accountRequest) (stripe.Customer, error) {
 	mappedCustomer := stripe.Customer{}
+	if account.Email == "" {
+		logger.Error("no email provided")
+		return mappedCustomer, errors.New("No email provided")
+	}
 	mappedCustomer.Email = account.Email
 	mappedCustomer.Meta = map[string]string{"name": account.Name, "allowTexting": strconv.FormatBool(account.AcceptTerms)}
-	return mappedCustomer
+	return mappedCustomer, nil
 }
 
 func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) (stripe.CardParams, error) {
@@ -321,7 +334,9 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	respondJson("success", http.StatusAccepted, w)
+	js, err := json.Marshal(customer)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 	return
 
 }

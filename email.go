@@ -133,7 +133,9 @@ func MailgunSendEmail(email Email) (res string, err error) {
 		message.SetHtml(email.Html)
 	}
 	_, id, err := mg.Send(message)
-	fmt.Println(id, err)
+	if err != nil {
+		logger.Error("Error sending email from mailgun ", err)
+	}
 	return id, err
 }
 

@@ -76,8 +76,6 @@ func WriteStringToFile(filepath, s string) error {
 	return nil
 }
 
-func lenMinus(arr []int, n int) int { return len(arr) - n }
-
 func orderConfirmationEmail(event stripe.Event) {
 
 	bufferBytes := bytes.Buffer{}
@@ -98,6 +96,7 @@ func orderConfirmationEmail(event stripe.Event) {
 	email.From = "info@wallacehatch.com"
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
+
 	MailgunSendEmail(email)
 
 }
