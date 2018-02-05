@@ -78,7 +78,15 @@ func fetchOrCreateCustomer(email string) (*stripe.Customer, error) {
 
 }
 
-func fetchProductBySku(skuId string) (stripe.SKU, error) {
+func fetchProductById(productId string) (stripe.Product, error) {
+	p, err := product.Get(productId, nil)
+	if err != nil {
+		logger.Error("Error fetching product from id", err)
+	}
+	return *p, err
+}
+
+func fetchSkuById(skuId string) (stripe.SKU, error) {
 	s, err := sku.Get(skuId, nil)
 	if err != nil {
 		logger.Error("Error fetching sku from id", err)

@@ -6,9 +6,11 @@ import (
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/webhook"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var stripeWebhookSig string
@@ -48,25 +50,40 @@ func StripeWebhookHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func orderUpdatedEvent(event stripe.Event) {
-	constructEmailInformation(event)
-
-	// statusTransitions, ok := event.Data.Prev["status_transitions"].(map[string]interface{})
-	// if !ok {
-	// 	fmt.Println("order has no status tranditions")
-	// }
-	// fulfiledChange, ok := statusTransitions["fulfiled"]
-	// if ok {
-	// 	fmt.Println("orders fulfillment updated!", fulfiledChange)
-	// 	orderShippedEmail(event)
-	// }
+	statusTransitions, ok := event.Data.Prev["status_transitions"].(map[string]interface{})
+	if !ok {
+		fmt.Println("order has no status tranditions")
+	}
+	fulfiledChange, ok := statusTransitions["fulfiled"]
+	if ok {
+		fmt.Println("orders fulfillment updated!", fulfiledChange)
+		orderShippedEmail(event)
+	}
 }
 
-func orderConfirmationEmail(event stripe.Event) {
-	fmt.Println("order was paid for successfully, time to email!")
-	bufferBytes := bytes.Buffer{}
+func WriteStringToFile(filepath, s string) error {
+	fo, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer fo.Close()
 
+	_, err = io.Copy(fo, strings.NewReader(s))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func lenMinus(arr []int, n int) int { return len(arr) - n }
+
+func orderConfirmationEmail(event stripe.Event) {
+
+	bufferBytes := bytes.Buffer{}
 	emailInfo := constructEmailInformation(event)
-	tmpl, err := template.ParseFiles("email-templates/test.html")
+	emailInfo.NumItemsMinus = emailInfo.NumItems - 1
+	tmpl, err := template.ParseFiles("email-templates/order-confirmation.html")
 	if err != nil {
 		logger.Error("error opening template ", err)
 
@@ -75,12 +92,37 @@ func orderConfirmationEmail(event stripe.Event) {
 		logger.Error("error executing html ", err)
 
 	}
-	fmt.Println(bufferBytes.String())
+
+	email := Email{}
+	email.Subject = "Order Confirmation"
+	email.From = "info@wallacehatch.com"
+	email.To = emailInfo.To
+	email.Html = bufferBytes.String()
+	MailgunSendEmail(email)
 
 }
 
 func orderShippedEmail(event stripe.Event) {
-	fmt.Println("gonna send email for shipping")
+
 	constructEmailInformation(event)
+	bufferBytes := bytes.Buffer{}
+	emailInfo := constructEmailInformation(event)
+	emailInfo.NumItemsMinus = emailInfo.NumItems - 1
+	tmpl, err := template.ParseFiles("email-templates/order-shipped.html")
+	if err != nil {
+		logger.Error("error opening template ", err)
+
+	}
+	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
+		logger.Error("error executing html ", err)
+
+	}
+
+	email := Email{}
+	email.Subject = "Order Shipped"
+	email.From = "info@wallacehatch.com"
+	email.To = emailInfo.To
+	email.Html = bufferBytes.String()
+	MailgunSendEmail(email)
 
 }

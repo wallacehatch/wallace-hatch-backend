@@ -59,7 +59,7 @@ type EmailItemInformation struct {
 	Style    string
 	ImageUrl string
 	Quantity int
-	Price    int64
+	Price    float64
 }
 
 type EmailShippingInformation struct {
@@ -70,20 +70,22 @@ type EmailShippingInformation struct {
 	TrackingNumber   string
 	TrackingCarrier  string
 	EstimatedArrival string // dont need to get fancy ,just set to 4-7 days for now
-
+	TrackingUrl      string
 }
 
 type EmailInformation struct {
-	To          string
-	From        string
-	FirstName   string
-	OrderNumber string
-	OrderDate   string
-	OrderTotal  float64
-	Items       []EmailItemInformation
-	CardType    string
-	CardMask    string
-	Shipping    EmailShippingInformation
+	To            string
+	From          string
+	FirstName     string
+	OrderNumber   string
+	OrderDate     string
+	OrderTotal    float64
+	Items         []EmailItemInformation
+	CardType      string
+	CardMask      string
+	Shipping      EmailShippingInformation
+	NumItems      int
+	NumItemsMinus int
 }
 
 // // Event is the resource representing a Stripe event.

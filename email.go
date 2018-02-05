@@ -39,6 +39,7 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 		fmt.Println("no customer id ")
 		customerId = "cus_CE6XPDfGQouohF"
 	}
+
 	stripeCustomer, _ := fetchCustomerFromId(customerId)
 	card, _ := fetchCard(customerId, stripeCustomer.DefaultSource.ID)
 
@@ -54,19 +55,37 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 	emailInfo.Shipping.State = addressInfo["state"].(string)
 	emailInfo.Shipping.Zip = addressInfo["postal_code"].(string)
 	emailInfo.Shipping.EstimatedArrival = "4-7"
+	carrier, ok := shippingInfo["carrier"].(string)
+	if !ok {
+		carrier = "USPS"
+	}
+	tracking, ok := shippingInfo["tracking_number"].(string)
+	if !ok {
+		tracking = "TRACK1234"
+
+	}
+	emailInfo.Shipping.TrackingCarrier = carrier
+	emailInfo.Shipping.TrackingNumber = tracking
+	emailInfo.Shipping.TrackingUrl = fmt.Sprint("https://tools.usps.com/go/TrackConfirmAction?tLabels=", tracking)
 
 	items := orderObject["items"].([]interface{})
+	numItems := 0
 	emailItems := make([]EmailItemInformation, 0)
 	for _, item := range items {
 		itemMap := item.(map[string]interface{})
-		if itemMap["object"].(string) == "order_item" {
+		if itemMap["type"].(string) == "sku" {
 			emailItem := EmailItemInformation{}
 			productId, ok := itemMap["parent"].(string)
 			if ok {
-				skuInfo, _ := fetchProductBySku(productId)
+				skuInfo, _ := fetchSkuById(productId)
+				emailItem.Size = fmt.Sprint(skuInfo.Attrs["size"], "MM")
 				emailItem.ImageUrl = skuInfo.Image
-				emailItem.Price = skuInfo.Price
+				emailItem.Price = float64(skuInfo.Price) / 100.0
+				productInfo, _ := fetchProductById(skuInfo.Product.ID)
+				emailItem.Color = productInfo.Meta["caseColor"]
 			}
+
+			emailItem.Style = productId
 
 			emailItem.Name = itemMap["description"].(string)
 			quantity, ok := itemMap["quantity"].(float64)
@@ -74,12 +93,14 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 				quantity = 0
 			}
 			emailItem.Quantity = int(quantity)
+			numItems = numItems + int(quantity)
 			emailItems = append(emailItems, emailItem)
 		}
 
 	}
 
 	emailInfo.Items = emailItems
+	emailInfo.NumItems = numItems
 
 	stripeCustomerName, ok := orderObject["name"].(string)
 	if !ok {
