@@ -7,7 +7,11 @@ services:
 
 install:
   - echo "install nothing!" # put your normal pre-testing installs here
-
+    # Install kubernetes and set config
+  - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+  - chmod +x ./kubectl
+  - sudo mv ./kubectl /usr/local/bin/kubectl
+   
 script:
   - echo "no tests!" # put your normal testing scripts here
 
@@ -17,6 +21,12 @@ after_success:
   - export PATH=$PATH:$HOME/.local/bin # put aws in the path
   - eval $(aws ecr get-login --no-include-email  --region us-east-1) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
   - docker build -t my_example_app .
-  - docker tag my_example_app:latest 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:latest
+  - docker tag my_example_app:latest 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_TEST
   - docker push 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend
-  
+  - sed -i -e 's|KUBE_CA_CERT|'"${KUBE_CA_CERT}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_ENDPOINT|'"${KUBE_ENDPOINT}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_ADMIN_CERT|'"${KUBE_ADMIN_CERT}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_ADMIN_KEY|'"${KUBE_ADMIN_KEY}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_USERNAME|'"${KUBE_USERNAME}"'|g' kubeconfig
+  - /usr/local/bin/kubectl --kubeconfig /kube/kubeconfig set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_TEST
+    
