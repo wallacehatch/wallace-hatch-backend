@@ -27,7 +27,7 @@ func nameParser(fullName string) (firsName string, lastName string) {
 	return splits[0], splits[len(splits)-1]
 }
 
-func constructEmailInformation(event stripe.Event) EmailInformation {
+func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 	emailInfo := EmailInformation{}
 	orderObject := event.Data.Obj
 	createdAt := int64(orderObject["created"].(float64))
@@ -50,10 +50,30 @@ func constructEmailInformation(event stripe.Event) EmailInformation {
 	shippingInfo := orderObject["shipping"].(map[string]interface{})
 	addressInfo := shippingInfo["address"].(map[string]interface{})
 
-	emailInfo.Shipping.Address = addressInfo["line1"].(string)
-	emailInfo.Shipping.City = addressInfo["city"].(string)
-	emailInfo.Shipping.State = addressInfo["state"].(string)
-	emailInfo.Shipping.Zip = addressInfo["postal_code"].(string)
+	address, ok := addressInfo["line1"].(string)
+	if !ok {
+		logger.Error("no address supplied from webhook")
+	}
+	emailInfo.Shipping.Address = address
+
+	city, ok := addressInfo["city"].(string)
+	if !ok {
+		logger.Error("no city supplied from webhook")
+	}
+	emailInfo.Shipping.City = city
+
+	state, ok := addressInfo["state"].(string)
+	if !ok {
+		logger.Error("no state supplied from webhook")
+	}
+	emailInfo.Shipping.State = state
+
+	zip, ok := addressInfo["postal_code"].(string)
+	if !ok {
+		logger.Error("no zip supplied from webhook")
+	}
+	emailInfo.Shipping.zip = zip
+
 	emailInfo.Shipping.EstimatedArrival = "4-7"
 	carrier, ok := shippingInfo["carrier"].(string)
 	if !ok {
