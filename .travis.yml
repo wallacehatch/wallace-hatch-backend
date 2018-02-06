@@ -28,5 +28,5 @@ after_success:
   - sed -i -e 's|KUBE_ADMIN_CERT|'"${KUBE_ADMIN_CERT}"'|g' kubeconfig
   - sed -i -e 's|KUBE_ADMIN_KEY|'"${KUBE_ADMIN_KEY}"'|g' kubeconfig
   - sed -i -e 's|KUBE_USERNAME|'"${KUBE_USERNAME}"'|g' kubeconfig
-  - /usr/local/bin/kubectl --kubeconfig /kube/kubeconfig set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_TEST
+  - /usr/local/bin/kubectl --kubeconfig kubeconfig set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_TEST
     
