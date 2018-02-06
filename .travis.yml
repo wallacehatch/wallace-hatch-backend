@@ -12,11 +12,11 @@ install:
   - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
   - chmod +x ./kubectl
   - sudo mv ./kubectl /usr/local/bin/kubectl
-  - sed -i -e 's|KUBE_CA_CERT|'"${KUBE_CA_CERT}"'|g' kubeconfig
-  - sed -i -e 's|KUBE_ENDPOINT|'"${KUBE_ENDPOINT}"'|g' kubeconfig
-  - sed -i -e 's|KUBE_ADMIN_CERT|'"${KUBE_ADMIN_CERT}"'|g' kubeconfig
-  - sed -i -e 's|KUBE_ADMIN_KEY|'"${KUBE_ADMIN_KEY}"'|g' kubeconfig
-  - sed -i -e 's|KUBE_USERNAME|'"${KUBE_USERNAME}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_CERTIFICATE_AUTHORITY_DATA|'"${KUBE_CERTIFICATE_AUTHORITY_DATA}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_CLIENT_AUTHORITY_DATA|'"${KUBE_CLIENT_AUTHORITY_DATA}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_CLIENT_KEY_DATA|'"${KUBE_CLIENT_KEY_DATA}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_USER_NAME|'"${KUBE_USER_NAME}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_USER_PASSWORD|'"${KUBE_USER_PASSWORD}"'|g' kubeconfig
   - cat kubeconfig
   - ls
   - /usr/local/bin/kubectl --kubeconfig kubeconfig get nodes
