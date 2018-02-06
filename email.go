@@ -72,7 +72,7 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 	if !ok {
 		logger.Error("no zip supplied from webhook")
 	}
-	emailInfo.Shipping.zip = zip
+	emailInfo.Shipping.Zip = zip
 
 	emailInfo.Shipping.EstimatedArrival = "4-7"
 	carrier, ok := shippingInfo["carrier"].(string)
@@ -133,7 +133,7 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 	emailInfo.OrderNumber = strings.Replace(orderObject["id"].(string), "or_", "", -1)
 	emailInfo.OrderTotal = orderObject["amount"].(float64) / 100.0
 
-	return emailInfo
+	return emailInfo, nil
 
 }
 
