@@ -1,4 +1,4 @@
-env GOOS=linux go build -o docker/main .
+env GOOS=linux go build -o main .
 
 cp -a email-templates/ docker/email-templates/
 

@@ -12,7 +12,7 @@ install:
   - sudo mv ./kubectl /usr/local/bin/kubectl
    
 script:
-  - env GOOS=linux go build -o docker/main .
+  - env GOOS=linux go build -o main .
 
 after_success:
   - docker --version  # document the version travis is using
