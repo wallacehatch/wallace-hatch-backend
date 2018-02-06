@@ -54,7 +54,7 @@ func main() {
 	router.HandleFunc("/stripe-webhook", StripeWebhookHandler)
 	handler := c.Handler(router)
 	port := ":8090"
-	logger.Info("Serving on ", port)
+	logger.Info("Yo Serving on -> ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
 
 }
