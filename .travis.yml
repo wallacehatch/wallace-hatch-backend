@@ -2,6 +2,7 @@ sudo: required #is required to use docker service in travis
 
 language: go #can be any language, just php for example
 
+
 services:
   - docker # required, but travis uses older version of docker :(
 
@@ -13,10 +14,10 @@ install:
   - sudo mv ./kubectl /usr/local/bin/kubectl
   - sed -i -e 's|KUBE_CA_CERT|'"${KUBE_CA_CERT}"'|g' kubeconfig
   - sed -i -e 's|KUBE_ENDPOINT|'"${KUBE_ENDPOINT}"'|g' kubeconfig
-  - sed -i -e 's|KUBE_ADMIN_CERT|'"${KUBE_ADMIN_CERT}"'|g' kubeconfig
-  - sed -i -e 's|KUBE_ADMIN_KEY|'"${KUBE_ADMIN_KEY}"'|g' kubeconfig
+  - sed -i -e 's|KUBE_ADMIN_CERT|'"${KUBE_ADMIN_CERT}"'|g' kube/kubeconfig
+  - sed -i -e 's|KUBE_ADMIN_KEY|'"${KUBE_ADMIN_KEY}"'|g' kubekubeconfig
   - sed -i -e 's|KUBE_USERNAME|'"${KUBE_USERNAME}"'|g' kubeconfig
-  - /usr/local/bin/kubectl --kubeconfig /kube/kubeconfig get nodes
+  - /usr/local/bin/kubectl --kubeconfig kubeconfig get nodes
    
 script:
   - echo "no tests!" # put your normal testing scripts here
@@ -27,12 +28,12 @@ script:
 #   - export PATH=$PATH:$HOME/.local/bin # put aws in the path
 #   - eval $(aws ecr get-login --no-include-email  --region us-east-1) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
 #   - docker build -t my_example_app .
-#   - docker tag my_example_app:latest 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_TEST
+#   - docker tag my_example_app:latest 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_${TRAVIS_BUILD_NUMBER}
 #   - docker push 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend
 #   - sed -i -e 's|KUBE_CA_CERT|'"${KUBE_CA_CERT}"'|g' kubeconfig
 #   - sed -i -e 's|KUBE_ENDPOINT|'"${KUBE_ENDPOINT}"'|g' kubeconfig
 #   - sed -i -e 's|KUBE_ADMIN_CERT|'"${KUBE_ADMIN_CERT}"'|g' kubeconfig
 #   - sed -i -e 's|KUBE_ADMIN_KEY|'"${KUBE_ADMIN_KEY}"'|g' kubeconfig
 #   - sed -i -e 's|KUBE_USERNAME|'"${KUBE_USERNAME}"'|g' kubeconfig
-#   - /usr/local/bin/kubectl --kubeconfig kubeconfig set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_TEST
+#   - /usr/local/bin/kubectl --kubeconfig kubeconfig set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_${TRAVIS_BUILD_NUMBER}
     
