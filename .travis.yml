@@ -2,19 +2,17 @@ sudo: required #is required to use docker service in travis
 
 language: go #can be any language, just php for example
 
-
 services:
   - docker # required, but travis uses older version of docker :(
 
 install:
-  - echo "install nothing!" # put your normal pre-testing installs here
     # Install kubernetes and set config
   - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
   - chmod +x ./kubectl
   - sudo mv ./kubectl /usr/local/bin/kubectl
    
 script:
-  - echo "no tests!" # put your normal testing scripts here
+  - echo "no tests!"
 
 after_success:
   - docker --version  # document the version travis is using
@@ -30,4 +28,3 @@ after_success:
   - sed -i -e 's|KUBE_USER_NAME|'"${KUBE_USER_NAME}"'|g' kubeconfig
   - sed -i -e 's|KUBE_USER_PASSWORD|'"${KUBE_USER_PASSWORD}"'|g' kubeconfig
   - /usr/local/bin/kubectl --kubeconfig kubeconfig set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_${TRAVIS_BUILD_NUMBER}
-    
