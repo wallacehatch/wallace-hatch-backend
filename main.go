@@ -32,6 +32,7 @@ func init() {
 	mailchimpAPIKey = os.Getenv("MAILCHIMP_API")
 	logger = log.New()
 	logger.Formatter = new(log.JSONFormatter)
+
 }
 
 func main() {
