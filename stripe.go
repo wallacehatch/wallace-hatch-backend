@@ -22,9 +22,11 @@ import (
 func init() {
 	stripeAccessToken := os.Getenv("STRIPE_KEY")
 	stripe.Key = stripeAccessToken
+	fmt.Println("heres token ", stripeAccessToken)
 }
 
 func fetchAllProductsHandler(w http.ResponseWriter, r *http.Request) {
+
 	params := &stripe.ProductListParams{}
 	products := make([]*stripe.Product, 0)
 	i := product.List(params)
