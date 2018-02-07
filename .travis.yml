@@ -31,4 +31,4 @@ after_success:
 
 
 notifications:
-  slack: wallacehatch:RO70Jj8wVv2spm1KDVf0t1P7
+  slack: wallacehatch:l8UAmh5H0RiKbtF7ICvkmSjB
