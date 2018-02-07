@@ -26,7 +26,7 @@ func init() {
 }
 
 func fetchAllProductsHandler(w http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("getting all products")
 	params := &stripe.ProductListParams{}
 	products := make([]*stripe.Product, 0)
 	i := product.List(params)
