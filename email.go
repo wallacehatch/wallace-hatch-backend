@@ -49,11 +49,13 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 
 	switch emailInfo.CardType {
 	case "Visa":
-		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/visa.svg"
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/visa%403x.png"
 	case "Mastercard":
-		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/mastercard.svg"
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/mastercard%403x.png"
 	case "Discover":
-		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/discover.svg"
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/discover%403x.png"
+	case "AmericanExpress":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/amex%403x.png"
 	}
 
 	emailInfo.OrderDate = dateStringFormatted
