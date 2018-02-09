@@ -46,6 +46,16 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 	emailInfo.To = stripeCustomer.Email
 	emailInfo.CardMask = card.LastFour
 	emailInfo.CardType = string(card.Brand)
+
+	switch emailInfo.CardType {
+	case "Visa":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/visa.svg"
+	case "Mastercard":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/mastercard.svg"
+	case "Discover":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/discover.svg"
+	}
+
 	emailInfo.OrderDate = dateStringFormatted
 	shippingInfo := orderObject["shipping"].(map[string]interface{})
 	addressInfo := shippingInfo["address"].(map[string]interface{})

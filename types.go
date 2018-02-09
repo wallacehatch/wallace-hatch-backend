@@ -82,6 +82,7 @@ type EmailInformation struct {
 	OrderTotal    float64
 	Items         []EmailItemInformation
 	CardType      string
+	CardImageUrl  string
 	CardMask      string
 	Shipping      EmailShippingInformation
 	NumItems      int
