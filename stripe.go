@@ -123,12 +123,15 @@ func fetchCustomerFromId(customerId string) (stripe.Customer, error) {
 }
 
 func fetchCard(customerId string, cardId string) (stripe.Card, error) {
+	c := &stripe.Card{}
 	c, err := card.Get(
 		cardId,
 		&stripe.CardParams{Customer: customerId},
 	)
+	fmt.Println("GOT CARD!", c)
 	if err != nil {
 		logger.Error("Error fetching card", err)
+
 	}
 	return *c, err
 

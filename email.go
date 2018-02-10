@@ -37,12 +37,14 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 	customerId, ok := orderObject["customer"].(string)
 	if !ok {
 		fmt.Println("no customer id ")
-		customerId = "cus_CE6XPDfGQouohF"
+		customerId = "cus_CIfUBNHrYfLsJ6"
 	}
 
 	stripeCustomer, _ := fetchCustomerFromId(customerId)
-	card, _ := fetchCard(customerId, stripeCustomer.DefaultSource.ID)
-
+	card, err := fetchCard(customerId, stripeCustomer.DefaultSource.ID)
+	if err != nil {
+		logger.Error("Error with card fetching", err)
+	}
 	emailInfo.To = stripeCustomer.Email
 	emailInfo.CardMask = card.LastFour
 	emailInfo.CardType = string(card.Brand)
@@ -54,7 +56,7 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/mastercard%403x.png"
 	case "Discover":
 		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/discover%403x.png"
-	case "AmericanExpress":
+	case "American Express":
 		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/amex%403x.png"
 	}
 

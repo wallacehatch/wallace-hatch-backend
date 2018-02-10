@@ -426,13 +426,21 @@
                                     <td width="400">
                                         <div style="font-size: 18px; display: block; margin: 0 auto; font-family: 'Cardo', serif; text-transform: uppercase; font-weight: normal; font-style: normal; font-stretch: normal; line-height: normal; letter-spacing: 5px; text-align: center; color: #000000;"> Payment Method </div>
                                         <div style="display:block; font-size:0pt; line-height:0pt; height:20px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="20" style="display:block; height:20px;" alt=""> </div>
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
+                                            <td width="21"></td>
+                                            <td width="47.3">
+                                                <div> <img src="{{.CardImageUrl}}" alt="..." class="" width="47" height="30" style="max-width: 47.3px, max-height: 30px; !important;"> </div>
+                                            </td>
+                                            <td width="15.7"></td>
+                                            <td>
+                                                <div style="display: inline-block !important; font-family: 'Open Sans', sans-serif;font-size: 12px;letter-spacing: 0.2px;text-align: left;color: #767676;display: inline-block;vertical-align: middle !important;">{{.CardType}}, Ending {{.CardMask}}</div>
+                                            </td>
 
-                                        <div style="position: relative; margin-left: 21px"> <img src="{{.Order.CardImageUrl}}" alt="..." class="" width="47" height="30" style="max-width: 47.3px, max-height: 30px; !important;">
-                                            <div style="display: inline-block; top: 4px !important; position: absolute; margin-left: 15.7px;">
-                                                <div style="display: inline-block; font-family: OpenSans;font-size: 12px;letter-spacing: 0.2px;text-align: left;color: #767676;display: inline-block;vertical-align: middle !important; min-width: 143px;">{{.CardType}}, Ending {{.CardMask}}</div>
-                                                <div style="width: 68px;height: 15px; font-family: Montserrat; font-size: 12px; letter-spacing: 2px; text-align: right; color: #000000; display: inline-block; margin-left: 83px; font-family: Montserrat; font-size: 12px; letter-spacing: 2px; text-align: right; color: #000000;">$ {{.OrderTotal}}</div>
-                                            </div>
-                                        </div>
+                                            <td width="15.7"></td>
+                                            <td>
+                                                <div style=" display: inline-block !important; width: 68px;height: 15px; font-family: Montserrat; font-size: 12px; letter-spacing: 2px; text-align: right; color: #000000; font-family: Montserrat; font-size: 12px; letter-spacing: 2px; text-align: right; color: #000000;">$ {{.OrderTotal}}</div>
+                                            </td>
+                                        </table>
                                         <div style="display:block; font-size:0pt; line-height:0pt; height:20px;width: 100% !important; height: auto !important; text-align: center !important; max-width: 100% !important;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="20" style="display:block; height:20px;" alt=""> </div>
 
                                         <div style="display:block; font-size:0pt; line-height:0pt; height:1px; background: #d8d8d8; width: 100%;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="100%" height="1" style="display:block; height:1px; background: #d8d8d8; max-width: 600px;" alt=""> </div>
@@ -440,8 +448,8 @@
                                     <td width="100"> </td>
 
                                 </tr>
-                            </table>
 
+                            </table>
                             <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
                                 <tr>
                                     <td width="100"> </td>
