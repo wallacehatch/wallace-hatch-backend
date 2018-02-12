@@ -16,6 +16,7 @@ var domain string
 var emailSender string
 
 func init() {
+
 	mailgunApiSecretKey = os.Getenv("MAILGUN_API_SECRET_KEY")
 	mailgunPublicKey = os.Getenv("MAILGUN_API_PUBLIC_KEY")
 	domain = "mg.wallacehatch.com"
@@ -37,6 +38,7 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 	customerId, ok := orderObject["customer"].(string)
 	if !ok {
 		fmt.Println("no customer id ")
+
 		customerId = "cus_CIfUBNHrYfLsJ6"
 	}
 
@@ -152,25 +154,30 @@ func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
 }
 
 func MailgunSendEmail(email Email) (res string, err error) {
-	mg := mailgun.NewMailgun(domain, mailgunApiSecretKey, mailgunPublicKey)
-	message := mailgun.NewMessage(
-		email.From,
-		email.Subject,
-		email.PlainText,
-		email.To)
-	message.SetTracking(true)
-	message.AddBCC("greg@wallacehatch.com")
-	message.SetTrackingClicks(true)
-	message.SetTrackingOpens(true)
-	if email.Html != "" {
-		fmt.Println("setting html", email.Html)
-		message.SetHtml(email.Html)
+
+	if strings.Contains(email.To, "@wallacehatch.com") {
+		mg := mailgun.NewMailgun(domain, mailgunApiSecretKey, mailgunPublicKey)
+		message := mailgun.NewMessage(
+			email.From,
+			email.Subject,
+			email.PlainText,
+			email.To)
+		message.SetTracking(true)
+		message.AddBCC("greg@wallacehatch.com")
+		message.SetTrackingClicks(true)
+		message.SetTrackingOpens(true)
+		if email.Html != "" {
+			fmt.Println("setting html", email.Html)
+			message.SetHtml(email.Html)
+		}
+		_, id, err := mg.Send(message)
+		if err != nil {
+			logger.Error("Error sending email from mailgun ", err)
+		}
+		return id, err
 	}
-	_, id, err := mg.Send(message)
-	if err != nil {
-		logger.Error("Error sending email from mailgun ", err)
-	}
-	return id, err
+
+	return "", nil
 }
 
 // "{
