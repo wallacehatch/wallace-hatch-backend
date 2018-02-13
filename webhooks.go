@@ -79,7 +79,7 @@ func WriteStringToFile(filepath, s string) error {
 func orderConfirmationEmail(event stripe.Event) {
 
 	bufferBytes := bytes.Buffer{}
-	emailInfo, _ := constructEmailInformation(event)
+	emailInfo, _ := constructEmailInformationFromEvent(event)
 	emailInfo.NumItemsMinus = emailInfo.NumItems - 1
 	tmpl, err := template.ParseFiles("email-templates/order-confirmation.html")
 	if err != nil {
@@ -102,10 +102,8 @@ func orderConfirmationEmail(event stripe.Event) {
 }
 
 func orderShippedEmail(event stripe.Event) {
-
-	constructEmailInformation(event)
 	bufferBytes := bytes.Buffer{}
-	emailInfo, _ := constructEmailInformation(event)
+	emailInfo, _ := constructEmailInformationFromEvent(event)
 	emailInfo.NumItemsMinus = emailInfo.NumItems - 1
 	tmpl, err := template.ParseFiles("email-templates/order-shipped.html")
 	if err != nil {

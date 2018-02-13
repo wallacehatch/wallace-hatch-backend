@@ -28,7 +28,7 @@ func nameParser(fullName string) (firsName string, lastName string) {
 	return splits[0], splits[len(splits)-1]
 }
 
-func constructEmailInformation(event stripe.Event) (EmailInformation, error) {
+func constructEmailInformationFromEvent(event stripe.Event) (EmailInformation, error) {
 	emailInfo := EmailInformation{}
 	orderObject := event.Data.Obj
 	createdAt := int64(orderObject["created"].(float64))
@@ -176,107 +176,7 @@ func MailgunSendEmail(email Email) (res string, err error) {
 		}
 		return id, err
 	}
+	logger.Info("email was not to wallace hatch address")
 
 	return "", nil
 }
-
-// "{
-//   "created": 1326853478,
-//   "livemode": false,
-//   "id": "evt_00000000000000",
-//   "type": "order.updated",
-//   "object": "event",
-//   "request": null,
-//   "pending_webhooks": 1,
-//   "api_version": "2018-01-23",
-//   "data": {
-//     "object": {
-//       "id": "or_00000000000000",
-//       "object": "order",
-//       "amount": 13999,
-//       "amount_returned": null,
-//       "application": null,
-//       "application_fee": null,
-//       "charge": null,
-//       "created": 1516897152,
-//       "currency": "usd",
-//       "customer": null,
-//       "email": "greg711miller@gmail.com",
-//       "items": [
-//         {
-//           "object": "order_item",
-//           "amount": 13999,
-//           "currency": "usd",
-//           "description": "Kalio Rose",
-//           "parent": "WR140S",
-//           "quantity": 1,
-//           "type": "sku"
-//         },
-//         {
-//           "object": "order_item",
-//           "amount": 0,
-//           "currency": "usd",
-//           "description": "Taxes (included)",
-//           "parent": null,
-//           "quantity": null,
-//           "type": "tax"
-//         },
-//         {
-//           "object": "order_item",
-//           "amount": 0,
-//           "currency": "usd",
-//           "description": "Free shipping",
-//           "parent": "ship_free-shipping",
-//           "quantity": null,
-//           "type": "shipping"
-//         }
-//       ],
-//       "livemode": false,
-//       "metadata": {
-//       },
-//       "returns": {
-//         "object": "list",
-//         "data": [
-
-//         ],
-//         "has_more": false,
-//         "total_count": 0,
-//         "url": "/v1/order_returns?order=or_1BoDRUGPb2UAQvII5Reaf1Ys"
-//       },
-//       "selected_shipping_method": "ship_free-shipping",
-//       "shipping": {
-//         "address": {
-//           "city": "San Francisco",
-//           "country": "US",
-//           "line1": "1234 Main Street",
-//           "line2": null,
-//           "postal_code": "94111",
-//           "state": "CA"
-//         },
-//         "carrier": null,
-//         "name": "Matthew Miller",
-//         "phone": null,
-//         "tracking_number": null
-//       },
-//       "shipping_methods": [
-//         {
-//           "id": "ship_free-shipping",
-//           "amount": 0,
-//           "currency": "usd",
-//           "delivery_estimate": null,
-//           "description": "Free shipping"
-//         }
-//       ],
-//       "status": "canceled",
-//       "status_transitions": {
-//         "canceled": 1516910957,
-//         "fulfiled": null,
-//         "paid": null,
-//         "returned": null
-//       },
-//       "updated": 1516910957
-//     },
-//     "previous_attributes": {
-//     }
-//   }
-// }"

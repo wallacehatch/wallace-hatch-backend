@@ -18,6 +18,10 @@ type orderRequest struct {
 	Items []itemRequest `json:"items"`
 }
 
+type couponSubmitRequest struct {
+	Email string `json:"email"`
+}
+
 type itemRequest struct {
 	SKU      string `json:"sku"`
 	Quantity int    `json:"quantity"`
@@ -74,19 +78,21 @@ type EmailShippingInformation struct {
 }
 
 type EmailInformation struct {
-	To            string
-	From          string
-	FirstName     string
-	OrderNumber   string
-	OrderDate     string
-	OrderTotal    float64
-	Items         []EmailItemInformation
-	CardType      string
-	CardImageUrl  string
-	CardMask      string
-	Shipping      EmailShippingInformation
-	NumItems      int
-	NumItemsMinus int
+	To             string
+	From           string
+	FirstName      string
+	OrderNumber    string
+	OrderDate      string
+	OrderTotal     float64
+	Items          []EmailItemInformation
+	CardType       string
+	CardImageUrl   string
+	CardMask       string
+	Shipping       EmailShippingInformation
+	NumItems       int
+	NumItemsMinus  int
+	CouponCode     string
+	CouponDiscount int
 }
 
 // // Event is the resource representing a Stripe event.

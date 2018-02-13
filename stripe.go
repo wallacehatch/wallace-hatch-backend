@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,6 +16,7 @@ import (
 	order "github.com/stripe/stripe-go/order"
 	product "github.com/stripe/stripe-go/product"
 	sku "github.com/stripe/stripe-go/sku"
+	"html/template"
 	"net/http"
 	"os"
 	"strconv"
@@ -23,6 +27,7 @@ func init() {
 	stripeAccessToken := os.Getenv("STRIPE_KEY")
 	stripe.Key = stripeAccessToken
 	fmt.Println("heres token ", stripeAccessToken)
+
 }
 
 func fetchAllProductsHandler(w http.ResponseWriter, r *http.Request) {
@@ -110,6 +115,69 @@ func getOrder(orderId string) (*stripe.Order, error) {
 
 }
 
+func getHash(text string) string {
+	h := sha1.New()
+	h.Write([]byte(text))
+	sha1 := hex.EncodeToString(h.Sum(nil))
+	return sha1
+}
+
+func createCouponFromEmail(email string) (*stripe.Coupon, error) {
+	hash := getHash(email)
+	couponId := hash[0:6] // shorten to make  more acccesible to user
+	c, err := coupon.New(&stripe.CouponParams{
+		Percent:  15,
+		Duration: "once",
+		ID:       couponId,
+	})
+
+	return c, err
+}
+
+func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
+	bufferBytes := bytes.Buffer{}
+	decoder := json.NewDecoder(r.Body)
+	var couponRequest couponSubmitRequest
+	err := decoder.Decode(&couponRequest)
+	if err != nil {
+		logger.Error("Error decoding coupon request", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	coupon, err := createCouponFromEmail(couponRequest.Email)
+	if err != nil {
+		logger.Error("Error creating coupon from email", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+
+	emailInfo := EmailInformation{}
+	emailInfo.To = couponRequest.Email
+	emailInfo.CouponCode = coupon.ID
+	emailInfo.CouponDiscount = int(coupon.Amount)
+
+	tmpl, err := template.ParseFiles("email-templates/receive-coupon.html")
+	if err != nil {
+		logger.Error("error opening template ", err)
+
+	}
+	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
+		logger.Error("error executing html ", err)
+	}
+
+	email := Email{}
+	email.Subject = fmt.Sprint("Welcome To Wallace Hatch - Take ", emailInfo.CouponDiscount, "% Off Your First Order")
+	email.From = "info@wallacehatch.com"
+	email.To = emailInfo.To
+	email.Html = bufferBytes.String()
+	MailgunSendEmail(email)
+	js, err := json.Marshal(coupon)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+	return
+
+}
+
 type idsReqeust struct {
 	Ids []string `json:"product_ids"`
 }
@@ -131,7 +199,6 @@ func fetchCard(customerId string, cardId string) (stripe.Card, error) {
 	fmt.Println("GOT CARD!", c)
 	if err != nil {
 		logger.Error("Error fetching card", err)
-
 	}
 	return *c, err
 
