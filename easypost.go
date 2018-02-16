@@ -22,7 +22,6 @@ Backend steps for ordering
 10: Webhooks are processed from easy post and SMS messages are sent out accordingly
 */
 
-
 const (
 	itemWieght      = 1.0 // lbs
 	uspsPackageType = "parcel"
@@ -46,13 +45,9 @@ func easypostController(order stripe.Order) {
 	if err != nil {
 		return
 	}
-	logger.Info(boughtShipment.Tracker)
-	logger.Info(boughtShipment.Tracker.EstDeliveryDate.)
 
 	updatedMeta := map[string]string{"postage_label": boughtShipment.PostageLabel.LabelURL, "tracking_code": boughtShipment.TrackingCode}
 	updateOrderMeta(order.ID, updatedMeta)
-	logger.Info("updated order")
-
 }
 
 func createFromAdd() (easypost.Address, error) {
