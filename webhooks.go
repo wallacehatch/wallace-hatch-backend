@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 var stripeWebhookSig string
@@ -90,14 +91,12 @@ func orderConfirmationEmail(event stripe.Event) {
 		logger.Error("error executing html ", err)
 
 	}
-
 	email := Email{}
 	email.Subject = "Order Confirmation"
-	email.From = "info@wallacehatch.com"
+	email.From = emailSender
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
-
-	MailgunSendEmail(email)
+	MailgunSendEmail(email, orderConfirmationTag, time.Now())
 
 }
 
@@ -114,12 +113,10 @@ func orderShippedEmail(event stripe.Event) {
 		logger.Error("error executing html ", err)
 
 	}
-
 	email := Email{}
 	email.Subject = "Order Shipped"
-	email.From = "info@wallacehatch.com"
+	email.From = emailSender
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
-	MailgunSendEmail(email)
-
+	MailgunSendEmail(email, shippedTag, time.Now())
 }

@@ -54,9 +54,9 @@ func main() {
 	router.HandleFunc("/get-coupon/{key}", fetchCoupon)
 	router.HandleFunc("/stripe-webhook/", StripeWebhookHandler)
 	router.HandleFunc("/apply-for-coupon/", couponSignupHandler).Methods("POST")
-
 	handler := c.Handler(router)
 	port := ":8090"
+	// easypostController()
 	logger.Info("Yo Serving on -> ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
 
@@ -131,11 +131,6 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 	respondJson("true", http.StatusOK, w)
 	return
 
-}
-
-type Response struct {
-	Text   string `json:"text"`
-	Status int    `json:"status"`
 }
 
 func respondJson(text string, status int, w http.ResponseWriter) {

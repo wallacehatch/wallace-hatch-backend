@@ -40,12 +40,18 @@ type shippingRequest struct {
 	Zip          string `json:"zip"`
 }
 
+type Response struct {
+	Text   string `json:"text"`
+	Status int    `json:"status"`
+}
+
 type completeOrderRequest struct {
-	Account  accountRequest  `json:"account"`
-	Card     cardRequest     `json:"cardInfo"`
-	Order    orderRequest    `json:"cart"`
-	Shipping shippingRequest `json:"shipping"`
-	Coupon   string          `json:"coupon"`
+	Account     accountRequest         `json:"account"`
+	Card        cardRequest            `json:"cardInfo"`
+	Order       orderRequest           `json:"cart"`
+	Shipping    shippingRequest        `json:"shipping"`
+	Coupon      string                 `json:"coupon"`
+	GooglePlace map[string]interface{} `json:"google_place"`
 }
 
 type Email struct {
@@ -93,6 +99,15 @@ type EmailInformation struct {
 	NumItemsMinus  int
 	CouponCode     string
 	CouponDiscount int
+}
+
+type ResponseError struct {
+	ErrorMsg string `json:"error_message"`
+	Status   int    `json:"status"`
+}
+
+type idsReqeust struct {
+	Ids []string `json:"product_ids"`
 }
 
 // // Event is the resource representing a Stripe event.

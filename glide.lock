@@ -1,5 +1,5 @@
-hash: b1e956e488708b93e39e71c2b92c2a7a0d6f95ae5d793420ba2ab4d957675e4a
-updated: 2018-01-29T10:52:42.640546-05:00
+hash: cff488960eef22e04376b1443721a7d7e6980c60a1918e2f0c1c7f15c81d0e06
+updated: 2018-02-14T12:56:41.210533-05:00
 imports:
 - name: github.com/beeker1121/mailchimp-go
   version: 7c5f827423b2a08c0cb05f6a79ea9fec1d2eb257
@@ -12,6 +12,8 @@ imports:
   version: 53c1911da2b537f792e7cafcb446b05ffe33b996
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
+- name: github.com/gregm711/easypost-go
+  version: ec7a69559fdb022f22d9898151a9ce002caf53c9
 - name: github.com/pkg/errors
   version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
 - name: github.com/rs/cors
@@ -21,7 +23,7 @@ imports:
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/stripe/stripe-go
-  version: 918a5726870d136e7dd8d973d46922b0bd07192d
+  version: c7c700f9a469299d3577b57bb9a970d005cfee6c
   subpackages:
   - card
   - coupon
@@ -31,6 +33,7 @@ imports:
   - order
   - orderitem
   - product
+  - sku
   - webhook
 - name: golang.org/x/crypto
   version: bd6f299fb381e4c3393d1c4b1f0b94f5e77650c8

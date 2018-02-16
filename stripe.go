@@ -21,6 +21,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -134,54 +135,6 @@ func createCouponFromEmail(email string) (*stripe.Coupon, error) {
 	return c, err
 }
 
-func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
-	bufferBytes := bytes.Buffer{}
-	decoder := json.NewDecoder(r.Body)
-	var couponRequest couponSubmitRequest
-	err := decoder.Decode(&couponRequest)
-	if err != nil {
-		logger.Error("Error decoding coupon request", err)
-		respondErrorJson(err, http.StatusBadRequest, w)
-		return
-	}
-	coupon, err := createCouponFromEmail(couponRequest.Email)
-	if err != nil {
-		logger.Error("Error creating coupon from email", err)
-		respondErrorJson(err, http.StatusBadRequest, w)
-		return
-	}
-
-	emailInfo := EmailInformation{}
-	emailInfo.To = couponRequest.Email
-	emailInfo.CouponCode = coupon.ID
-	emailInfo.CouponDiscount = int(coupon.Amount)
-
-	tmpl, err := template.ParseFiles("email-templates/receive-coupon.html")
-	if err != nil {
-		logger.Error("error opening template ", err)
-
-	}
-	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
-		logger.Error("error executing html ", err)
-	}
-
-	email := Email{}
-	email.Subject = fmt.Sprint("Welcome To Wallace Hatch - Take ", emailInfo.CouponDiscount, "% Off Your First Order")
-	email.From = "info@wallacehatch.com"
-	email.To = emailInfo.To
-	email.Html = bufferBytes.String()
-	MailgunSendEmail(email)
-	js, err := json.Marshal(coupon)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
-	return
-
-}
-
-type idsReqeust struct {
-	Ids []string `json:"product_ids"`
-}
-
 func fetchCustomerFromId(customerId string) (stripe.Customer, error) {
 	c, err := customer.Get(customerId, nil)
 	if err != nil {
@@ -244,6 +197,13 @@ func fetchProductsByIds(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+func updateOrderMeta(orderId string, meta map[string]string) error {
+	params := &stripe.OrderUpdateParams{}
+	params.Meta = meta
+	_, err := order.Update(orderId, params)
+	return err
+}
+
 func payOrder(orderId string, customerId string) (*stripe.Order, error) {
 	orderPayParams := &stripe.OrderPayParams{}
 	orderPayParams.Customer = customerId
@@ -258,18 +218,43 @@ func payOrder(orderId string, customerId string) (*stripe.Order, error) {
 	return o, err
 }
 
-func mapToStripeOrderParams(currentOrder orderRequest, currentShipping shippingRequest, customerId string, coupon string) *stripe.OrderParams {
+func mapToStripeShippingParams(googlePlace map[string]interface{}, currentShipping shippingRequest) *stripe.ShippingParams {
+	mappedAddress := &stripe.AddressParams{}
+	addressComponents, _ := googlePlace["address_components"].([]interface{})
+	formattedAddress := googlePlace["formatted_address"].(string)
+	addressSplit := strings.Split(formattedAddress, ",")
+
+	mappedAddress.Line1 = addressSplit[0]
+	mappedAddress.Line2 = currentShipping.AptSuite
+	logger.Info("google info")
+
+	for _, addressInfo := range addressComponents {
+
+		info := addressInfo.(map[string]interface{})
+		infoType := info["types"].([]interface{})
+		logger.Info(info)
+		switch infoType[0] {
+		case "country":
+			mappedAddress.Country = info["short_name"].(string)
+		case "postal_code":
+			mappedAddress.PostalCode = info["short_name"].(string)
+		case "locality":
+			mappedAddress.City = info["short_name"].(string)
+		case "administrative_area_level_1":
+			mappedAddress.State = info["short_name"].(string)
+
+		}
+	}
+	mappedShipping := &stripe.ShippingParams{Name: currentShipping.Name, Address: mappedAddress}
+
+	return mappedShipping
+
+}
+
+func mapToStripeOrderParams(currentOrder orderRequest, shippingParams *stripe.ShippingParams, customerId string, coupon string) *stripe.OrderParams {
 	mappedOrder := &stripe.OrderParams{}
 	mappedOrder.Currency = currency.USD
 	orderItemParams := make([]*stripe.OrderItemParams, 0)
-
-	address := &stripe.AddressParams{
-		Line1:      currentShipping.Address,
-		City:       currentShipping.City,
-		State:      currentShipping.State,
-		Country:    "US",
-		PostalCode: currentShipping.Zip,
-	}
 
 	for _, item := range currentOrder.Items {
 
@@ -282,7 +267,7 @@ func mapToStripeOrderParams(currentOrder orderRequest, currentShipping shippingR
 
 	}
 	mappedOrder.Items = orderItemParams
-	mappedOrder.Shipping = &stripe.ShippingParams{Name: currentShipping.Name, Address: address}
+	mappedOrder.Shipping = shippingParams
 	mappedOrder.Customer = customerId
 	mappedOrder.Coupon = coupon
 	fmt.Println("MAPPED ORDER", mappedOrder)
@@ -332,12 +317,6 @@ func fetchCoupon(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 
-}
-
-type ResponseError struct {
-	ErrorMsg string `json:"error_message"`
-
-	Status int `json:"status"`
 }
 
 func fetchCouponById(couponId string) (stripe.Coupon, error) {
@@ -441,8 +420,13 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	stripeOrderParams := mapToStripeOrderParams(orderRequest.Order, orderRequest.Shipping, customer.ID, orderRequest.Coupon)
+
+	shippingParams := mapToStripeShippingParams(orderRequest.GooglePlace, orderRequest.Shipping)
+
+	stripeOrderParams := mapToStripeOrderParams(orderRequest.Order, shippingParams, customer.ID, orderRequest.Coupon)
+
 	newOrder, err := order.New(stripeOrderParams)
+
 	if err != nil {
 		logger.Error("Error creating order ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
@@ -454,7 +438,62 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
+	go easypostController(*newOrder)
+
 	js, err := json.Marshal(order)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+	return
+
+}
+
+// when a customer signs up for the coupon, the are subscribed to our email list and a customer object is created,
+// as well as a hashed coupon code that is emailed to be redemed
+func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
+	bufferBytes := bytes.Buffer{}
+	decoder := json.NewDecoder(r.Body)
+	var couponRequest couponSubmitRequest
+	err := decoder.Decode(&couponRequest)
+	if err != nil {
+		logger.Error("Error decoding coupon request", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	_, err = fetchOrCreateCustomer(couponRequest.Email)
+	if err != nil {
+		logger.Error("Error creating customer ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+
+	coupon, err := createCouponFromEmail(couponRequest.Email)
+	if err != nil {
+		logger.Error("Error creating coupon from email", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	emailInfo := EmailInformation{}
+	emailInfo.To = couponRequest.Email
+	emailInfo.CouponCode = coupon.ID
+	emailInfo.CouponDiscount = int(coupon.Amount)
+	tmpl, err := template.ParseFiles("email-templates/receive-coupon.html")
+	if err != nil {
+		logger.Error("error opening template ", err)
+
+	}
+	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
+		logger.Error("error executing html ", err)
+	}
+	email := Email{}
+	email.Subject = fmt.Sprint("Welcome To Wallace Hatch - Take ", emailInfo.CouponDiscount, "% Off Your First Order")
+	email.From = emailSender
+	email.To = emailInfo.To
+	email.Html = bufferBytes.String()
+	MailgunSendEmail(email, applyCouponTag, time.Now())
+
+	addToMailchimpNewsletter(couponRequest.Email, "", "")
+
+	js, err := json.Marshal(coupon)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 	return
