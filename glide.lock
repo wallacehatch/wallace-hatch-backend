@@ -13,7 +13,7 @@ imports:
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gregm711/easypost-go
-  version: ec7a69559fdb022f22d9898151a9ce002caf53c9
+  version: 551ba2168ddb54a95397fa1cc8b05171719380b0
 - name: github.com/pkg/errors
   version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
 - name: github.com/rs/cors
