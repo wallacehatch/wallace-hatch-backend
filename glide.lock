@@ -1,5 +1,5 @@
-hash: c369b3d62e37ecfa43b2bb5644a0e6597b01b568f03f9d61834d04e800b29939
-updated: 2018-02-18T14:29:18.926852-05:00
+hash: bc0b7a16c2fea72787d755749d8f8a8ab32ae49a918ce55bc6235fcd82134442
+updated: 2018-02-20T09:07:01.745847-05:00
 imports:
 - name: github.com/beeker1121/mailchimp-go
   version: 7c5f827423b2a08c0cb05f6a79ea9fec1d2eb257
@@ -13,7 +13,7 @@ imports:
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gregm711/easypost-go
-  version: 551ba2168ddb54a95397fa1cc8b05171719380b0
+  version: f2d053adeb30a0ad5b40d39c2286a1fb0a1bbdb5
   subpackages:
   - easypost
   - fake

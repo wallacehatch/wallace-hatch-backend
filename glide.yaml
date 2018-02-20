@@ -18,5 +18,5 @@ import:
 - package: gopkg.in/mailgun/mailgun-go.v1
   version: ^1.1.0
 - package: github.com/gregm711/easypost-go
-  version: ^0.4.0
+  version: ^0.5.0
 - package: github.com/sfreiberg/gotwilio
