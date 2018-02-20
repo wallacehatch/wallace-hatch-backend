@@ -36,7 +36,6 @@ func StripeWebhookHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	switch event.Type {
 	case "order.created":
 		fmt.Println("order was created")
@@ -87,11 +86,9 @@ func orderConfirmationEmail(event stripe.Event) {
 	tmpl, err := template.ParseFiles("email-templates/order-confirmation.html")
 	if err != nil {
 		logger.Error("error opening template ", err)
-
 	}
 	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
 		logger.Error("error executing html ", err)
-
 	}
 	email := Email{}
 	email.Subject = "Order Confirmation"
@@ -125,20 +122,15 @@ func orderShippedEmail(event stripe.Event) {
 
 func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	logger.Info("received webhook for easyopst:")
-	_, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	logger.Info(r.Body)
 	var hook easypostWebhook
 	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&hook)
+	err := decoder.Decode(&hook)
 	if err != nil {
 		logger.Error("Error decoding easy post webhook ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
+	fmt.Println(hook)
 	shipment, _ := fetchShipmentFromId(hook.Result.ShipmentID)
 	orderId := shipment.Reference
 
@@ -154,7 +146,7 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	// customer wants to get information via sms on tracking
 	if customer.Meta["allowTexting"] == "true" && customer.Meta["phone"] != "" {
 		message := constructMessage(hook)
-		sendMessage(customer.Meta["phone"], message)
+		sendSMSMessage(customer.Meta["phone"], message)
 	}
 
 }

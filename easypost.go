@@ -151,7 +151,7 @@ func constructMessage(hook easypostWebhook) string {
 	if len(trackingUpdates) > 0 {
 		message = fmt.Sprint(message, trackingUpdates[len(trackingUpdates)-1].Message)
 	}
-
+	logger.Info("Heres message: ", message)
 	return message
 
 }

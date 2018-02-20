@@ -20,3 +20,5 @@ import:
 - package: github.com/gregm711/easypost-go
   version: ^0.5.0
 - package: github.com/sfreiberg/gotwilio
+- package: github.com/ttacon/libphonenumber
+  version: ^1.0.0
