@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
+
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -54,9 +55,12 @@ func main() {
 	router.HandleFunc("/get-coupon/{key}", fetchCoupon)
 	router.HandleFunc("/stripe-webhook/", StripeWebhookHandler)
 	router.HandleFunc("/apply-for-coupon/", couponSignupHandler).Methods("POST")
+	router.HandleFunc("/easypost-webhook/", easypostWebhookHandler)
 	handler := c.Handler(router)
+	// order, _ := fetchOrderById("or_1BxK4JGPb2UAQvIIk7Fgf7qe")
+
+	// logger.Info(order.Meta)
 	port := ":8090"
-	// easypostController()
 	logger.Info("Yo Serving on -> ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
 

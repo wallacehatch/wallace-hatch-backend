@@ -41,17 +41,12 @@ func constructEmailInformationFromEvent(event stripe.Event) (EmailInformation, e
 	dateStringFormatted := fmt.Sprint(strings.Split(dateString, "-")[1], "/", strings.Split(dateString, "-")[2], "/", strings.Split(dateString, "-")[0])
 
 	customerId, ok := orderObject["customer"].(string)
-	if !ok {
-		fmt.Println("no customer id ")
-
-		customerId = "cus_CIfUBNHrYfLsJ6"
-	}
+	orderId, ok := orderObject["id"].(string)
+	order, _ := fetchOrderById(orderId)
 
 	stripeCustomer, _ := fetchCustomerFromId(customerId)
-	card, err := fetchCard(customerId, stripeCustomer.DefaultSource.ID)
-	if err != nil {
-		logger.Error("Error with card fetching", err)
-	}
+	card, _ := fetchCard(customerId, stripeCustomer.DefaultSource.ID)
+
 	emailInfo.To = stripeCustomer.Email
 	emailInfo.CardMask = card.LastFour
 	emailInfo.CardType = string(card.Brand)
@@ -68,46 +63,20 @@ func constructEmailInformationFromEvent(event stripe.Event) (EmailInformation, e
 	}
 
 	emailInfo.OrderDate = dateStringFormatted
-	shippingInfo := orderObject["shipping"].(map[string]interface{})
-	addressInfo := shippingInfo["address"].(map[string]interface{})
+	emailInfo.Shipping.Address = order.Shipping.Address.Line1
+	emailInfo.Shipping.City = order.Shipping.Address.City
+	emailInfo.Shipping.State = order.Shipping.Address.State
+	emailInfo.Shipping.Zip = order.Shipping.Address.Zip
 
-	address, ok := addressInfo["line1"].(string)
-	if !ok {
-		logger.Error("no address supplied from webhook")
+	// following is values from meta for easypost
+	shippingId, ok := order.Meta["shipment_id"]
+	if ok {
+		easypostShipment, _ := fetchShipmentFromId(shippingId)
+		emailInfo.Shipping.EstimatedArrival = "4-7"
+		emailInfo.Shipping.TrackingCarrier = easypostShipment.Tracker.Carrier
+		emailInfo.Shipping.TrackingNumber = easypostShipment.TrackingCode
+		emailInfo.Shipping.TrackingUrl = easypostShipment.Tracker.PublicURL
 	}
-	emailInfo.Shipping.Address = address
-
-	city, ok := addressInfo["city"].(string)
-	if !ok {
-		logger.Error("no city supplied from webhook")
-	}
-	emailInfo.Shipping.City = city
-
-	state, ok := addressInfo["state"].(string)
-	if !ok {
-		logger.Error("no state supplied from webhook")
-	}
-	emailInfo.Shipping.State = state
-
-	zip, ok := addressInfo["postal_code"].(string)
-	if !ok {
-		logger.Error("no zip supplied from webhook")
-	}
-	emailInfo.Shipping.Zip = zip
-
-	emailInfo.Shipping.EstimatedArrival = "4-7"
-	carrier, ok := shippingInfo["carrier"].(string)
-	if !ok {
-		carrier = "USPS"
-	}
-	tracking, ok := shippingInfo["tracking_number"].(string)
-	if !ok {
-		tracking = "TRACK1234"
-
-	}
-	emailInfo.Shipping.TrackingCarrier = carrier
-	emailInfo.Shipping.TrackingNumber = tracking
-	emailInfo.Shipping.TrackingUrl = fmt.Sprint("https://tools.usps.com/go/TrackConfirmAction?tLabels=", tracking)
 
 	items := orderObject["items"].([]interface{})
 	numItems := 0
@@ -142,14 +111,7 @@ func constructEmailInformationFromEvent(event stripe.Event) (EmailInformation, e
 
 	emailInfo.Items = emailItems
 	emailInfo.NumItems = numItems
-
-	stripeCustomerName, ok := orderObject["name"].(string)
-	if !ok {
-		fmt.Println("no customer name")
-		stripeCustomerName = "Greg Miller"
-	}
-
-	firstName, _ := nameParser(stripeCustomerName)
+	firstName, _ := nameParser(order.Shipping.Name)
 	emailInfo.FirstName = firstName
 	emailInfo.OrderNumber = strings.Replace(orderObject["id"].(string), "or_", "", -1)
 	emailInfo.OrderTotal = orderObject["amount"].(float64) / 100.0
@@ -187,3 +149,104 @@ func MailgunSendEmail(email Email, tag string, deliveryTime time.Time) (res stri
 
 	return "", nil
 }
+
+// "{
+//   "created": 1326853478,
+//   "livemode": false,
+//   "id": "evt_00000000000000",
+//   "type": "order.updated",
+//   "object": "event",
+//   "request": null,
+//   "pending_webhooks": 1,
+//   "api_version": "2018-02-06",
+//   "data": {
+//     "object": {
+//       "id": "or_00000000000000",
+//       "object": "order",
+//       "amount": 13999,
+//       "amount_returned": null,
+//       "application": null,
+//       "application_fee": null,
+//       "charge": null,
+//       "created": 1516897152,
+//       "currency": "usd",
+//       "customer": null,
+//       "email": "greg711miller@gmail.com",
+//       "items": [
+//         {
+//           "object": "order_item",
+//           "amount": 13999,
+//           "currency": "usd",
+//           "description": "Kalio Rose",
+//           "parent": "WR140S",
+//           "quantity": 1,
+//           "type": "sku"
+//         },
+//         {
+//           "object": "order_item",
+//           "amount": 0,
+//           "currency": "usd",
+//           "description": "Taxes (included)",
+//           "parent": null,
+//           "quantity": null,
+//           "type": "tax"
+//         },
+//         {
+//           "object": "order_item",
+//           "amount": 0,
+//           "currency": "usd",
+//           "description": "Free shipping",
+//           "parent": "ship_free-shipping",
+//           "quantity": null,
+//           "type": "shipping"
+//         }
+//       ],
+//       "livemode": false,
+//       "metadata": {
+//       },
+//       "returns": {
+//         "object": "list",
+//         "data": [
+//
+//         ],
+//         "has_more": false,
+//         "total_count": 0,
+//         "url": "/v1/order_returns?order=or_1BoDRUGPb2UAQvII5Reaf1Ys"
+//       },
+//       "selected_shipping_method": "ship_free-shipping",
+//       "shipping": {
+//         "address": {
+//           "city": "San Francisco",
+//           "country": "US",
+//           "line1": "1234 Main Street",
+//           "line2": null,
+//           "postal_code": "94111",
+//           "state": "CA"
+//         },
+//         "carrier": null,
+//         "name": "Matthew Miller",
+//         "phone": null,
+//         "tracking_number": null
+//       },
+//       "shipping_methods": [
+//         {
+//           "id": "ship_free-shipping",
+//           "amount": 0,
+//           "currency": "usd",
+//           "delivery_estimate": null,
+//           "description": "Free shipping"
+//         }
+//       ],
+//       "status": "canceled",
+//       "status_transitions": {
+//         "canceled": 1516910957,
+//         "fulfiled": null,
+//         "paid": null,
+//         "returned": null
+//       },
+//       "updated": 1516910957
+//     },
+//     "previous_attributes": {
+//     }
+//   }
+// }"

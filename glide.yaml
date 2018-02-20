@@ -19,3 +19,4 @@ import:
   version: ^1.1.0
 - package: github.com/gregm711/easypost-go
   version: ^0.4.0
+- package: github.com/sfreiberg/gotwilio

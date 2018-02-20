@@ -27,12 +27,9 @@ import (
 func init() {
 	stripeAccessToken := os.Getenv("STRIPE_KEY")
 	stripe.Key = stripeAccessToken
-	fmt.Println("heres token ", stripeAccessToken)
-
 }
 
 func fetchAllProductsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("getting all products")
 	params := &stripe.ProductListParams{}
 	products := make([]*stripe.Product, 0)
 	i := product.List(params)
@@ -65,24 +62,22 @@ func fetchProductByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func fetchOrCreateCustomer(email string) (*stripe.Customer, error) {
+func fetchOrCreateCustomer(customerParams stripe.CustomerParams) (*stripe.Customer, error) {
 	var err error
+
 	currentCustomer := &stripe.Customer{}
 	params := &stripe.CustomerListParams{}
-	params.Filters.AddFilter("email", "", email)
+	params.Filters.AddFilter("email", "", customerParams.Email)
 	i := customer.List(params)
 	for i.Next() {
 		currentCustomer = i.Customer()
 	}
 	if currentCustomer.ID == "" {
-		if email == "" {
+		if customerParams.Email == "" {
 			logger.Error("No email provided")
 			return currentCustomer, errors.New("No email provided")
 		}
-		customerParams := &stripe.CustomerParams{
-			Email: email,
-		}
-		currentCustomer, err = customer.New(customerParams)
+		currentCustomer, err = customer.New(&customerParams)
 		if err != nil {
 			logger.Error("Error creating customer from params", err)
 		}
@@ -149,7 +144,6 @@ func fetchCard(customerId string, cardId string) (stripe.Card, error) {
 		cardId,
 		&stripe.CardParams{Customer: customerId},
 	)
-	fmt.Println("GOT CARD!", c)
 	if err != nil {
 		logger.Error("Error fetching card", err)
 	}
@@ -174,7 +168,7 @@ func fetchProductsByIds(w http.ResponseWriter, r *http.Request) {
 	var t idsReqeust
 	err := decoder.Decode(&t)
 	if err != nil {
-		fmt.Println("ERROR", err)
+		logger.Error("Error fetching product by ids: ", err)
 		return
 	}
 	params := &stripe.ProductListParams{}
@@ -226,13 +220,11 @@ func mapToStripeShippingParams(googlePlace map[string]interface{}, currentShippi
 
 	mappedAddress.Line1 = addressSplit[0]
 	mappedAddress.Line2 = currentShipping.AptSuite
-	logger.Info("google info")
 
 	for _, addressInfo := range addressComponents {
 
 		info := addressInfo.(map[string]interface{})
 		infoType := info["types"].([]interface{})
-		logger.Info(info)
 		switch infoType[0] {
 		case "country":
 			mappedAddress.Country = info["short_name"].(string)
@@ -260,29 +252,26 @@ func mapToStripeOrderParams(currentOrder orderRequest, shippingParams *stripe.Sh
 
 		quant := int64(item.Quantity)
 		if quant > 0 {
-			fmt.Println("quantity is ", quant)
 			stripeItem := &stripe.OrderItemParams{Type: "sku", Parent: item.SKU, Quantity: &quant}
 			orderItemParams = append(orderItemParams, stripeItem)
 		}
-
 	}
 	mappedOrder.Items = orderItemParams
 	mappedOrder.Shipping = shippingParams
 	mappedOrder.Customer = customerId
 	mappedOrder.Coupon = coupon
-	fmt.Println("MAPPED ORDER", mappedOrder)
 
 	return mappedOrder
 }
 
-func mapToStripeCustomer(account accountRequest) (stripe.Customer, error) {
-	mappedCustomer := stripe.Customer{}
+func mapToStripeCustomerParams(account accountRequest) (stripe.CustomerParams, error) {
+	mappedCustomer := stripe.CustomerParams{}
 	if account.Email == "" {
 		logger.Error("no email provided")
 		return mappedCustomer, errors.New("No email provided")
 	}
 	mappedCustomer.Email = account.Email
-	mappedCustomer.Meta = map[string]string{"name": account.Name, "allowTexting": strconv.FormatBool(account.AcceptTerms)}
+	mappedCustomer.Meta = map[string]string{"name": account.Name, "allowTexting": strconv.FormatBool(account.AcceptTerms), "phone": account.Phone}
 	return mappedCustomer, nil
 }
 
@@ -292,8 +281,6 @@ func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) (stri
 	mappedCard.Number = cardInfo.Number
 	dateSplit := strings.Split(cardInfo.Exp, "/")
 	if (len(dateSplit) < 1) || (len(cardInfo.Exp) < 1) {
-		logger.Error("date not in correct format", cardInfo.Exp)
-
 		return mappedCard, errors.New("Date for credit card not in format MM/YY")
 	}
 	year := fmt.Sprint("20", dateSplit[1])
@@ -344,6 +331,15 @@ func respondErrorJson(err error, status int, w http.ResponseWriter) {
 
 }
 
+func fetchOrderById(orderId string) (stripe.Order, error) {
+	o, err := order.Get(orderId, nil)
+	if err != nil {
+		logger.Error("Error fetching stripe order by id", err)
+	}
+	return *o, err
+
+}
+
 func createCustomer(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -354,8 +350,8 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-
-	customer, err := fetchOrCreateCustomer(orderRequest.Account.Email)
+	mappedCustomer, err := mapToStripeCustomerParams(orderRequest.Account)
+	customer, err := fetchOrCreateCustomer(mappedCustomer)
 	if err != nil {
 		logger.Error("Error creating customer ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
@@ -402,7 +398,8 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	customer, err := fetchOrCreateCustomer(orderRequest.Account.Email)
+	mappedCustomer, err := mapToStripeCustomerParams(orderRequest.Account)
+	customer, err := fetchOrCreateCustomer(mappedCustomer)
 	if err != nil {
 		logger.Error("Error creating customer ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
@@ -459,13 +456,15 @@ func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	_, err = fetchOrCreateCustomer(couponRequest.Email)
+	account := accountRequest{}
+	account.Email = couponRequest.Email
+	mappedCustomer, _ := mapToStripeCustomerParams(account)
+	_, err = fetchOrCreateCustomer(mappedCustomer)
 	if err != nil {
 		logger.Error("Error creating customer ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-
 	coupon, err := createCouponFromEmail(couponRequest.Email)
 	if err != nil {
 		logger.Error("Error creating coupon from email", err)

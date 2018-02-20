@@ -1,5 +1,5 @@
-hash: cff488960eef22e04376b1443721a7d7e6980c60a1918e2f0c1c7f15c81d0e06
-updated: 2018-02-14T12:56:41.210533-05:00
+hash: c369b3d62e37ecfa43b2bb5644a0e6597b01b568f03f9d61834d04e800b29939
+updated: 2018-02-18T14:29:18.926852-05:00
 imports:
 - name: github.com/beeker1121/mailchimp-go
   version: 7c5f827423b2a08c0cb05f6a79ea9fec1d2eb257
@@ -14,12 +14,17 @@ imports:
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gregm711/easypost-go
   version: 551ba2168ddb54a95397fa1cc8b05171719380b0
+  subpackages:
+  - easypost
+  - fake
 - name: github.com/pkg/errors
   version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
 - name: github.com/rs/cors
   version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 - name: github.com/satori/go.uuid
   version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
+- name: github.com/sfreiberg/gotwilio
+  version: 58125ef28e4b5d7ab5328593099ae8cac5fcf6a2
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/stripe/stripe-go

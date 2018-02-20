@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/webhook"
@@ -53,7 +54,7 @@ func StripeWebhookHandler(w http.ResponseWriter, r *http.Request) {
 func orderUpdatedEvent(event stripe.Event) {
 	statusTransitions, ok := event.Data.Prev["status_transitions"].(map[string]interface{})
 	if !ok {
-		fmt.Println("order has no status tranditions")
+		fmt.Println("order has no status transitions")
 	}
 	fulfiledChange, ok := statusTransitions["fulfiled"]
 	if ok {
@@ -78,6 +79,7 @@ func WriteStringToFile(filepath, s string) error {
 }
 
 func orderConfirmationEmail(event stripe.Event) {
+	logger.Info("order confirmation time")
 
 	bufferBytes := bytes.Buffer{}
 	emailInfo, _ := constructEmailInformationFromEvent(event)
@@ -119,4 +121,40 @@ func orderShippedEmail(event stripe.Event) {
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
 	MailgunSendEmail(email, shippedTag, time.Now())
+}
+
+func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
+	logger.Info("received webhook for easyopst:")
+	_, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	logger.Info(r.Body)
+	var hook easypostWebhook
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&hook)
+	if err != nil {
+		logger.Error("Error decoding easy post webhook ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	shipment, _ := fetchShipmentFromId(hook.Result.ShipmentID)
+	orderId := shipment.Reference
+
+	order, err := fetchOrderById(orderId)
+	if err != nil {
+		logger.Error("Error fetching order from id ", err)
+	}
+	customer, err := fetchCustomerFromId(order.Customer.ID)
+	if err != nil {
+		logger.Error("Error fetching customer from ID", err)
+	}
+
+	// customer wants to get information via sms on tracking
+	if customer.Meta["allowTexting"] == "true" && customer.Meta["phone"] != "" {
+		message := constructMessage(hook)
+		sendMessage(customer.Meta["phone"], message)
+	}
+
 }

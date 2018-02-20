@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gregm711/easypost-go/easypost"
 	"github.com/stripe/stripe-go"
-
 	"os"
 	"strconv"
 )
@@ -30,7 +30,6 @@ const (
 func init() {
 	easypost.SetApiKey(os.Getenv("EASY_POST_KEY"))
 	easypost.Request = easypost.RequestController{}
-
 }
 
 func easypostController(order stripe.Order) {
@@ -39,14 +38,13 @@ func easypostController(order stripe.Order) {
 	fromAdd, _ := createFromAdd()
 
 	parcel, _ := createParcel(order)
-	shipment, _ := createShipment(toAdd, fromAdd, parcel)
+	shipment, _ := createShipment(toAdd, fromAdd, parcel, order.ID)
 	lowestPriceShipment, _ := selectLowestShipmentRate(shipment)
 	boughtShipment, err := buyShipment(lowestPriceShipment)
 	if err != nil {
 		return
 	}
-
-	updatedMeta := map[string]string{"postage_label": boughtShipment.PostageLabel.LabelURL, "tracking_code": boughtShipment.TrackingCode}
+	updatedMeta := map[string]string{"postage_label": boughtShipment.PostageLabel.LabelURL, "tracking_code": boughtShipment.TrackingCode, "shipment_id": boughtShipment.ID, "tracking_url": boughtShipment.Tracker.PublicURL}
 	updateOrderMeta(order.ID, updatedMeta)
 }
 
@@ -107,12 +105,13 @@ func createParcel(order stripe.Order) (easypost.Parcel, error) {
 
 }
 
-func createShipment(toAddress easypost.Address, fromAddress easypost.Address, parcel easypost.Parcel) (easypost.Shipment, error) {
+func createShipment(toAddress easypost.Address, fromAddress easypost.Address, parcel easypost.Parcel, stripeOrderId string) (easypost.Shipment, error) {
 	shipment := easypost.Shipment{
 		ToAddress:     toAddress,
 		FromAddress:   fromAddress,
 		ReturnAddress: fromAddress,
 		Parcel:        parcel,
+		Reference:     stripeOrderId,
 	}
 	err := shipment.Create()
 	if err != nil {
@@ -144,4 +143,25 @@ func buyShipment(shipment easypost.Shipment) (easypost.Shipment, error) {
 	}
 	return shipment, err
 
+}
+
+func constructMessage(hook easypostWebhook) string {
+	message := "Tracking update for your wallace hatch purchase: \n"
+	trackingUpdates := hook.Result.TrackingDetails
+	if len(trackingUpdates) > 0 {
+		message = fmt.Sprint(message, trackingUpdates[len(trackingUpdates)-1].Message)
+	}
+
+	return message
+
+}
+
+func fetchShipmentFromId(shimpentId string) (easypost.Shipment, error) {
+	shipment := easypost.Shipment{}
+	shipment.ID = shimpentId
+	err := shipment.Get()
+	if err != nil {
+		logger.Error("Error fetching shipment from Id", err)
+	}
+	return shipment, err
 }
