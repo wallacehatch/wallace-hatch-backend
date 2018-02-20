@@ -259,6 +259,7 @@ func mapToStripeOrderParams(currentOrder orderRequest, shippingParams *stripe.Sh
 	mappedOrder.Items = orderItemParams
 	mappedOrder.Shipping = shippingParams
 	mappedOrder.Customer = customerId
+
 	mappedOrder.Coupon = coupon
 
 	return mappedOrder
