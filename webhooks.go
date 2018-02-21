@@ -130,7 +130,7 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	fmt.Println(hook)
+
 	shipment, _ := fetchShipmentFromId(hook.Result.ShipmentID)
 	orderId := shipment.Reference
 
@@ -146,7 +146,12 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	// customer wants to get information via sms on tracking
 	if customer.Meta["allowTexting"] == "true" && customer.Meta["phone"] != "" {
 		message := constructMessage(hook)
-		sendSMSMessage(customer.Meta["phone"], message)
+		if message != "" {
+			logger.Info("about to send message", message)
+			response, err := sendSMSMessage(customer.Meta["phone"], message)
+			logger.Info(response, err)
+		}
+
 	}
 
 }

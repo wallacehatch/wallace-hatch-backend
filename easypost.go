@@ -146,14 +146,20 @@ func buyShipment(shipment easypost.Shipment) (easypost.Shipment, error) {
 }
 
 func constructMessage(hook easypostWebhook) string {
-	message := "Tracking update for your wallace hatch purchase: \n"
+	message := ""
 	trackingUpdates := hook.Result.TrackingDetails
-	if len(trackingUpdates) > 0 {
-		message = fmt.Sprint(message, trackingUpdates[len(trackingUpdates)-1].Message)
+	newestIndex := 0
+	for index, update := range trackingUpdates {
+		if update.Datetime.After(trackingUpdates[newestIndex].Datetime) {
+			newestIndex = index
+		}
 	}
-	logger.Info("Heres message: ", message)
-	return message
+	message = fmt.Sprint("Tracking update from Wallace Hatch: \n", trackingUpdates[newestIndex].Message)
+	if trackingUpdates[newestIndex].TrackingLocation.State != "" {
+		message = fmt.Sprint(message, "\n Current Location: \n", trackingUpdates[newestIndex].TrackingLocation.City, " ", trackingUpdates[newestIndex].TrackingLocation.State)
+	}
 
+	return message
 }
 
 func fetchShipmentFromId(shimpentId string) (easypost.Shipment, error) {

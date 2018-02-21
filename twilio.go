@@ -21,31 +21,29 @@ func init() {
 	twillioPhoneNumber = os.Getenv("TWILIO_PHONE_NUMBER")
 }
 
-func sendSMSMessage(toPhoneNumber string, message string) error {
-	toPhoneNumber = "1(440) 396-6613" // only send to greg's cell until we know shit is working
+func sendSMSMessage(toPhoneNumber string, message string) (*gotwilio.SmsResponse, error) {
+	response := &gotwilio.SmsResponse{}
+	// toPhoneNumber = "1(440) 396-6613" // only send to greg's cell until we know shit is working
 	toPhoneNumber, err := cleanPhoneNumber(toPhoneNumber)
 	if err != nil {
 		logger.Error("Error formatting to  number", err)
-		return err
+		return response, err
 	}
 	twilio := gotwilio.NewTwilioClient(twillioSID, twillioAuthToken)
-
 	response, exception, err := twilio.SendSMS(twillioPhoneNumber, toPhoneNumber, message, "", "")
 	if exception != nil {
 		logger.Error("Exception sending message through twilio", exception)
-		return errors.New(exception.Message)
+		return response, errors.New(exception.Message)
 	}
 	if err != nil {
 		logger.Error("Error sending message through twilio ", err)
-		return err
+		return response, err
 	}
 	_, err = json.Marshal(response)
 	if err != nil {
-
 		logger.Error("Error marashling twilio response ", err)
 	}
-
-	return err
+	return response, err
 }
 
 // ex : go from  +1 (440) 396-6613  -> +14403966613
