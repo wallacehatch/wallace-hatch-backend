@@ -23,7 +23,7 @@ Backend steps for ordering
 */
 
 const (
-	itemWieght      = 1.0 // lbs
+	itemWieght      = 9.0 // ounces
 	uspsPackageType = "parcel"
 )
 
@@ -44,20 +44,46 @@ func easypostController(order stripe.Order) {
 	if err != nil {
 		return
 	}
-	updatedMeta := map[string]string{"postage_label": boughtShipment.PostageLabel.LabelURL, "tracking_code": boughtShipment.TrackingCode, "shipment_id": boughtShipment.ID, "tracking_url": boughtShipment.Tracker.PublicURL}
+	updatedMeta := map[string]string{"postage_label_pdf_url": boughtShipment.PostageLabel.LabelPdfURL, "postage_label_url": boughtShipment.PostageLabel.LabelURL, "tracking_code": boughtShipment.TrackingCode, "shipment_id": boughtShipment.ID, "tracking_url": boughtShipment.Tracker.PublicURL}
 	updateOrderMeta(order.ID, updatedMeta)
+}
+
+func testEasypost(order stripe.Order) {
+	toAdd, _ := createFacebookAdd()
+	fromAdd, _ := createFromAdd()
+
+	parcel, _ := createParcel(order)
+	shipment, _ := createShipment(toAdd, fromAdd, parcel, order.ID)
+	selectLowestShipmentRate(shipment)
+
 }
 
 func createFromAdd() (easypost.Address, error) {
 	address := easypost.Address{
 		Name:    "Wallce Hatch",
-		Street1: "364 East Northwood Avenue",
+		Street1: "629 North High Street",
+		Street2: "4th Floor",
 		City:    "Columbus",
 		State:   "OH",
 		Zip:     "43201",
 		Country: "US",
 		Email:   "customerservice@wallacehatch.com",
 		Phone:   "4159150936",
+	}
+	err := address.Create()
+
+	return address, err
+
+}
+
+func createFacebookAdd() (easypost.Address, error) {
+	address := easypost.Address{
+		Name:    "Facebook",
+		Street1: "1 Hacker Way",
+		City:    "Menlo Park",
+		State:   "CA",
+		Zip:     "94025",
+		Country: "US",
 	}
 	err := address.Create()
 
@@ -88,14 +114,14 @@ func createAddress(shippingInfo stripe.Shipping) (easypost.Address, error) {
 
 func createParcel(order stripe.Order) (easypost.Parcel, error) {
 
-	totalweight := 0.0
+	totalWeight := 0.0
 	for _, item := range order.Items {
-		totalweight = totalweight + float64(itemWieght*item.Quantity)
+		totalWeight = totalWeight + float64(itemWieght*item.Quantity)
 	}
-
+	logger.Info(totalWeight)
 	parcel := easypost.Parcel{
 		PredefinedPackage: uspsPackageType,
-		Weight:            float32(totalweight),
+		Weight:            float32(totalWeight),
 	}
 	err := parcel.Create()
 	if err != nil {
@@ -126,6 +152,7 @@ func selectLowestShipmentRate(shipment easypost.Shipment) (easypost.Shipment, er
 	for index, rate := range shipment.Rates {
 		price, _ := strconv.ParseFloat(rate.Rate, 64)
 		currentPrice, _ := strconv.ParseFloat(lowestRate.Rate, 64)
+		logger.Info("Price of shipping: ", price, " ", rate.Service)
 		if price < currentPrice {
 			lowestRate = shipment.Rates[index]
 		}

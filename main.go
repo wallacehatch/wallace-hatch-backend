@@ -58,9 +58,6 @@ func main() {
 	router.HandleFunc("/easypost-webhook/", easypostWebhookHandler)
 	handler := c.Handler(router)
 
-	order, _ := fetchOrderById("or_1Bxi9lGPb2UAQvII1AKskQQJ")
-	easypostController(order)
-
 	port := ":8090"
 	logger.Info("Serving on ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
