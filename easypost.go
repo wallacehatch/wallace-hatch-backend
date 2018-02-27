@@ -48,16 +48,6 @@ func easypostController(order stripe.Order) {
 	updateOrderMeta(order.ID, updatedMeta)
 }
 
-func testEasypost(order stripe.Order) {
-	toAdd, _ := createFacebookAdd()
-	fromAdd, _ := createFromAdd()
-
-	parcel, _ := createParcel(order)
-	shipment, _ := createShipment(toAdd, fromAdd, parcel, order.ID)
-	selectLowestShipmentRate(shipment)
-
-}
-
 func createFromAdd() (easypost.Address, error) {
 	address := easypost.Address{
 		Name:    "Wallce Hatch",
@@ -69,21 +59,6 @@ func createFromAdd() (easypost.Address, error) {
 		Country: "US",
 		Email:   "customerservice@wallacehatch.com",
 		Phone:   "4159150936",
-	}
-	err := address.Create()
-
-	return address, err
-
-}
-
-func createFacebookAdd() (easypost.Address, error) {
-	address := easypost.Address{
-		Name:    "Facebook",
-		Street1: "1 Hacker Way",
-		City:    "Menlo Park",
-		State:   "CA",
-		Zip:     "94025",
-		Country: "US",
 	}
 	err := address.Create()
 
@@ -152,7 +127,6 @@ func selectLowestShipmentRate(shipment easypost.Shipment) (easypost.Shipment, er
 	for index, rate := range shipment.Rates {
 		price, _ := strconv.ParseFloat(rate.Rate, 64)
 		currentPrice, _ := strconv.ParseFloat(lowestRate.Rate, 64)
-		logger.Info("Price of shipping: ", price, " ", rate.Service)
 		if price < currentPrice {
 			lowestRate = shipment.Rates[index]
 		}

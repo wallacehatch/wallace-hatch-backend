@@ -23,7 +23,6 @@ func init() {
 
 func sendSMSMessage(toPhoneNumber string, message string) (*gotwilio.SmsResponse, error) {
 	response := &gotwilio.SmsResponse{}
-	// toPhoneNumber = "1(440) 396-6613" // only send to greg's cell until we know shit is working
 	toPhoneNumber, err := cleanPhoneNumber(toPhoneNumber)
 	if err != nil {
 		logger.Error("Error formatting to  number", err)

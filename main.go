@@ -118,18 +118,13 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 		respondJson("false", http.StatusInternalServerError, w)
 		return
 	}
-	status := "unsubscribed"
-	if emailSignup.Subscribed {
-		status = "subscribed"
-	}
-	params := &members.NewParams{}
-	params.EmailAddress = emailSignup.Email
-	params.Status = members.Status(status)
-	member, err := members.New("06e5278452", params)
+
+	member, err := addToMailchimpNewsletter(emailSignup.Email, "", "")
+
 	if err != nil {
-		logger.Error("Error with mailchimp  on email form", err, params, member)
+		logger.Error("Error with mailchimp  on email form", err, member)
 	}
-	logger.Info("subscribed is ", params.Status, "emailSingup is", emailSignup)
+
 	respondJson("true", http.StatusOK, w)
 	return
 

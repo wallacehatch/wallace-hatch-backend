@@ -121,33 +121,28 @@ func constructEmailInformationFromEvent(event stripe.Event) (EmailInformation, e
 }
 
 func MailgunSendEmail(email Email, tag string, deliveryTime time.Time) (res string, err error) {
-
-	if strings.Contains(email.To, "@wallacehatch.com") {
-		mg := mailgun.NewMailgun(domain, mailgunApiSecretKey, mailgunPublicKey)
-		message := mailgun.NewMessage(
-			email.From,
-			email.Subject,
-			email.PlainText,
-			email.To)
-		message.SetTracking(true)
-		message.AddBCC("greg@wallacehatch.com")
-		message.SetTrackingClicks(true)
-		message.SetTrackingOpens(true)
-		message.SetDeliveryTime(deliveryTime)
-		message.AddTag(tag)
-		if email.Html != "" {
-			fmt.Println("setting html", email.Html)
-			message.SetHtml(email.Html)
-		}
-		_, id, err := mg.Send(message)
-		if err != nil {
-			logger.Error("Error sending email from mailgun ", err)
-		}
-		return id, err
+	mg := mailgun.NewMailgun(domain, mailgunApiSecretKey, mailgunPublicKey)
+	message := mailgun.NewMessage(
+		email.From,
+		email.Subject,
+		email.PlainText,
+		email.To)
+	message.SetTracking(true)
+	message.AddBCC("greg@wallacehatch.com")
+	message.SetTrackingClicks(true)
+	message.SetTrackingOpens(true)
+	message.SetDeliveryTime(deliveryTime)
+	message.AddTag(tag)
+	if email.Html != "" {
+		fmt.Println("setting html", email.Html)
+		message.SetHtml(email.Html)
 	}
-	logger.Info("email was not to wallace hatch address")
+	_, id, err := mg.Send(message)
+	if err != nil {
+		logger.Error("Error sending email from mailgun ", err)
+	}
 
-	return "", nil
+	return id, err
 }
 
 // "{
