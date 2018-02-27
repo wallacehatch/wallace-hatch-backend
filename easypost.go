@@ -147,7 +147,8 @@ func buyShipment(shipment easypost.Shipment) (easypost.Shipment, error) {
 }
 
 func constructMessage(hook easypostWebhook) string {
-	message := ""
+
+	shortenedTrackingLink, _ := shortenUrl(hook.Result.PublicURL)
 	trackingUpdates := hook.Result.TrackingDetails
 	newestIndex := 0
 	for index, update := range trackingUpdates {
@@ -155,12 +156,25 @@ func constructMessage(hook easypostWebhook) string {
 			newestIndex = index
 		}
 	}
-	message = fmt.Sprint("Tracking update from Wallace Hatch: \n", trackingUpdates[newestIndex].Message)
-	if trackingUpdates[newestIndex].TrackingLocation.State != "" {
-		message = fmt.Sprint(message, "\n Current Location: \n", trackingUpdates[newestIndex].TrackingLocation.City, " ", trackingUpdates[newestIndex].TrackingLocation.State)
-	}
+	estDelivery := hook.Result.EstDeliveryDate
 
-	return message
+	mostRecentTrackingMessage := trackingUpdates[newestIndex].Message
+	currentLocation := fmt.Sprint(trackingUpdates[newestIndex].TrackingLocation.City, " ", trackingUpdates[newestIndex].TrackingLocation.State)
+	estimatedArrival := fmt.Sprint(estDelivery.Weekday().String(), ", ", estDelivery.Month().String(), " ", estDelivery.Day())
+
+	// we know this is a juicy tracking event that the customer needs to know about
+	switch mostRecentTrackingMessage {
+	case "Arrived at USPS Origin Facility":
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way! Current location 📍 ", currentLocation, " Estimated delivery 📅 ", estimatedArrival, ". Track at ", shortenedTrackingLink)
+	case "Arrived at Post Office":
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way! Current location 📍 ", currentLocation, " Estimated delivery 📅 ", estimatedArrival, ". Track at ", shortenedTrackingLink)
+	case "Out for Delivery":
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way! Current location 📍 ", currentLocation, " Estimated delivery 📅 ", estimatedArrival, ". Track at ", shortenedTrackingLink)
+	case "Delivered":
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉")
+	}
+	return ""
+
 }
 
 func fetchShipmentFromId(shimpentId string) (easypost.Shipment, error) {
