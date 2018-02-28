@@ -6,6 +6,7 @@ import (
 	"github.com/stripe/stripe-go"
 	"os"
 	"strconv"
+	"time"
 )
 
 /*
@@ -156,11 +157,9 @@ func constructMessage(hook easypostWebhook) string {
 			newestIndex = index
 		}
 	}
-	estDelivery := hook.Result.EstDeliveryDate
-
 	mostRecentTrackingMessage := trackingUpdates[newestIndex].Message
 	currentLocation := fmt.Sprint(trackingUpdates[newestIndex].TrackingLocation.City, " ", trackingUpdates[newestIndex].TrackingLocation.State)
-	estimatedArrival := fmt.Sprint(estDelivery.Weekday().String(), ", ", estDelivery.Month().String(), " ", estDelivery.Day())
+	estimatedArrival := formatDate(hook.Result.EstDeliveryDate)
 
 	// we know this is a juicy tracking event that the customer needs to know about
 	switch mostRecentTrackingMessage {
@@ -185,4 +184,28 @@ func fetchShipmentFromId(shimpentId string) (easypost.Shipment, error) {
 		logger.Error("Error fetching shipment from Id", err)
 	}
 	return shipment, err
+}
+
+func formatDate(date time.Time) string {
+	day := ""
+	switch date.Weekday().String() {
+	case "Monday":
+		day = "Mon"
+	case "Tuesday":
+		day = "Tue"
+	case "Wednesday":
+		day = "Wed"
+	case "Thursday":
+		day = "Thurs"
+	case "Friday":
+		day = "Tue"
+	case "Saturday":
+		day = "Sat"
+	case "Sunday":
+		day = "Sun"
+
+	}
+
+	return fmt.Sprint(day, ", ", date.Month().String(), " ", date.Day())
+
 }
