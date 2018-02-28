@@ -165,7 +165,7 @@ func (s *Shipment) ConvertLabel(format string) error {
 func (s *Shipment) Get() error {
 	obj, err := Request.do("GET", "shipment", fmt.Sprintf(s.ID), "")
 	if err != nil {
-		return fmt.Errorf("Failed to fetch shipment from ID: %", err)
+		return fmt.Errorf("Failed to fetch shipment from ID: %v", err)
 	}
 	return json.Unmarshal(obj, &s)
 }
@@ -190,9 +190,6 @@ func (s Shipment) getCreatePayload(prefix string) string {
 	bodyString = fmt.Sprintf("%v&%v", bodyString, s.Parcel.getCreatePayload(parcelPrefix))
 	bodyString = fmt.Sprintf("%v&%v[carrier_accounts][0]=%v", bodyString, prefix, s.SelectedRate.CarrierAccountID)
 	bodyString = fmt.Sprintf("%v&%v[customs_info][id]=%v", bodyString, prefix, s.CustomsInfo.ID)
-	if s.Reference != "" {
-		bodyString = fmt.Sprintf("%v&%v[reference]=%v", bodyString, prefix, s.Reference)
-	}
 
 	if s.Options != nil {
 		var optionsPrefix = fmt.Sprintf("%v[options]", prefix)

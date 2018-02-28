@@ -22,3 +22,6 @@ import:
 - package: github.com/sfreiberg/gotwilio
 - package: github.com/ttacon/libphonenumber
   version: ^1.0.0
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson

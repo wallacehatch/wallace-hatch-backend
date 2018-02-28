@@ -1,5 +1,5 @@
-hash: b77833ae8827fd8f7da343418722b7228f4d899a6d514ce2a128b0b0a064ab52
-updated: 2018-02-20T14:24:21.491227-05:00
+hash: 1fa0d32f26ccb5fabd867ab9ca354f978a36fcb00087a28a05548a0dee372f2e
+updated: 2018-02-28T13:13:22.702219-05:00
 imports:
 - name: github.com/beeker1121/mailchimp-go
   version: 7c5f827423b2a08c0cb05f6a79ea9fec1d2eb257
@@ -17,14 +17,14 @@ imports:
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gregm711/easypost-go
-  version: fe169b70c0140f8994416a470c09fadece4fb886
+  version: f2d053adeb30a0ad5b40d39c2286a1fb0a1bbdb5
   subpackages:
   - easypost
   - fake
 - name: github.com/pkg/errors
   version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
 - name: github.com/rs/cors
-  version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
+  version: feef513b9575b32f84bafa580aad89b011259019
 - name: github.com/satori/go.uuid
   version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/sfreiberg/gotwilio
@@ -59,4 +59,11 @@ imports:
   - windows
 - name: gopkg.in/mailgun/mailgun-go.v1
   version: a4002e2df2e8ca2da6a6fbb4a72871b504e49f50
+- name: gopkg.in/mgo.v2
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  subpackages:
+  - bson
+  - internal/json
+  - internal/sasl
+  - internal/scram
 testImports: []
