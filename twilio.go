@@ -20,6 +20,9 @@ func init() {
 	twillioAuthToken = os.Getenv("TWILIO_AUTH_TOKEN")
 	twillioPhoneNumber = os.Getenv("TWILIO_PHONE_NUMBER")
 
+	twillioPhoneNumber = "4159150936"
+	twillioAuthToken = "73a7df6b9c9fa9cdb4b0a2e6bdddde9e"
+	twillioSID = "ACe7bd9a2815a17ae04f12d39ed9aab5fa"
 }
 
 func sendSMSMessage(toPhoneNumber string, message string) (*gotwilio.SmsResponse, error) {

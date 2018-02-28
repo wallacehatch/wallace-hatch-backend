@@ -165,11 +165,11 @@ func constructMessage(hook easypostWebhook) string {
 	// we know this is a juicy tracking event that the customer needs to know about
 	switch mostRecentTrackingMessage {
 	case "Arrived at USPS Origin Facility":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way! Current location 📍 ", currentLocation, " Estimated delivery 📅 ", estimatedArrival, ". Track at ", shortenedTrackingLink)
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
 	case "Arrived at Post Office":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way! Current location 📍 ", currentLocation, " Estimated delivery 📅 ", estimatedArrival, ". Track at ", shortenedTrackingLink)
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
 	case "Out for Delivery":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way! Current location 📍 ", currentLocation, " Estimated delivery 📅 ", estimatedArrival, ". Track at ", shortenedTrackingLink)
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
 	case "Delivered":
 		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉")
 	}

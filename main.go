@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
-
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -58,7 +57,6 @@ func main() {
 	router.HandleFunc("/easypost-webhook/", easypostWebhookHandler)
 	router.HandleFunc("/test-twilio/", testTwilioHandler)
 	handler := c.Handler(router)
-
 	port := ":8090"
 	logger.Info("Serving on ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
@@ -158,3 +156,10 @@ func respondJson(text string, status int, w http.ResponseWriter) {
 	w.WriteHeader(status)
 	w.Write(jsonResponse)
 }
+
+// mostRecentTrackingMessage := "Out for Delivery"
+// currentLocation := "CHARLESTON SC"
+// estimatedArrival := "Tuesday, February 27"
+// shortenedTrackingLink, _ := shortenUrl("https://track.easypost.com/djE6dHJrX2ZjYTRjZTQyNDk2ZjQ5NjBiODkxNzQzOTQ1YWQ5OGMy")
+// message := fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
+// sendSMSMessage("4403966613", message)
