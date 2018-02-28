@@ -56,6 +56,9 @@ func main() {
 	router.HandleFunc("/apply-for-coupon/", couponSignupHandler).Methods("POST")
 	router.HandleFunc("/easypost-webhook/", easypostWebhookHandler)
 	router.HandleFunc("/test-twilio/", testTwilioHandler)
+	router.HandleFunc("/create-review/", createProductReviewHandler).Methods("POST")
+	router.HandleFunc("/get-product-reviews/{key}", fetchProductReviewsHandler).Methods("GET")
+
 	handler := c.Handler(router)
 	port := ":8090"
 	logger.Info("Serving on ", port)
@@ -69,7 +72,6 @@ func testTwilioHandler(w http.ResponseWriter, r *http.Request) {
 	twilio, err := sendSMSMessage("4403966613", message)
 	if err != nil {
 		logger.Error("Error with twilio", err)
-
 	}
 	logger.Info("twilio info ", twilio)
 	return
