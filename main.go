@@ -56,11 +56,25 @@ func main() {
 	router.HandleFunc("/stripe-webhook/", StripeWebhookHandler)
 	router.HandleFunc("/apply-for-coupon/", couponSignupHandler).Methods("POST")
 	router.HandleFunc("/easypost-webhook/", easypostWebhookHandler)
+	router.HandleFunc("/test-twilio/", testTwilioHandler)
 	handler := c.Handler(router)
 
 	port := ":8090"
 	logger.Info("Serving on ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
+
+}
+
+func testTwilioHandler(w http.ResponseWriter, r *http.Request) {
+	logger.Info("Testing twilio webhook")
+	message := "Hey Greg - this message means twilio is working on production servers for wally 🤘"
+	twilio, err := sendSMSMessage("4403966613", message)
+	if err != nil {
+		logger.Error("Error with twilio", err)
+
+	}
+	logger.Info("twilio info ", twilio)
+	return
 
 }
 
