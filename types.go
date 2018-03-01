@@ -114,6 +114,11 @@ type idsReqeust struct {
 	Ids []string `json:"product_ids"`
 }
 
+type validateReviewRequest struct {
+	CustomerId string `json:"customer_id"`
+	ProductId  string `json:"product_id"`
+}
+
 type easypostWebhook struct {
 	Result struct {
 		ID              string      `json:"id"`

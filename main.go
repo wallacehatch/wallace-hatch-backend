@@ -58,7 +58,8 @@ func main() {
 	router.HandleFunc("/test-twilio/", testTwilioHandler)
 	router.HandleFunc("/create-review/", createProductReviewHandler).Methods("POST")
 	router.HandleFunc("/get-product-reviews/{key}", fetchProductReviewsHandler).Methods("GET")
-
+	router.HandleFunc("/get-customer-orders/{key}", fetchPastOrdersHandler).Methods("GET")
+	router.HandleFunc("/validate-review/", fetchPastOrdersHandler).Methods("POST")
 	handler := c.Handler(router)
 	port := ":8090"
 	logger.Info("Serving on ", port)

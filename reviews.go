@@ -3,8 +3,8 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
-	"github.com/stripe/stripe-go"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"net"
@@ -60,7 +60,7 @@ type productReviewRequest struct {
 	StarRating    float32 `json:"star_rating" bson:"star_rating"`
 	ReviewTitle   string  `json:"review_title" bson:"review_title"`
 	ReviewMessage string  `json:"review_message" bson:"review_message"`
-	CustomerEmail string  `json:"customer_email" bson:"customer_email"`
+	CustomerId    string  `json:"customer_id" bson:"customer_id"`
 }
 
 func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,13 +69,20 @@ func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
 	var productReviewReq productReviewRequest
 	err := decoder.Decode(&productReviewReq)
 	if err != nil {
-		logger.Error("Error decoding coupon request", err)
+		logger.Error("Error decoding product review request", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	customerParams := stripe.CustomerParams{}
-	customerParams.Email = productReviewReq.CustomerEmail
-	customer, _ := fetchOrCreateCustomer(customerParams)
+	customer, _ := fetchCustomerFromId(productReviewReq.CustomerId)
+
+	prevPurchased := doesCustomerContainPastOrder(customer.ID, productReviewReq.ProductId)
+
+	if !prevPurchased {
+		err := errors.New("User has not purchased this product before, and therefore cannnot leave a review")
+		logger.Error("User has not purchased this product before", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
 
 	db := db()
 	defer db.Session.Close()
@@ -86,7 +93,7 @@ func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
 	pr.ReviewMessage = productReviewReq.ReviewMessage
 	pr.CustomerId = customer.ID
 	pr.CustomerName = customer.Meta["name"]
-	pr.CustomerEmail = productReviewReq.CustomerEmail
+	pr.CustomerEmail = customer.Email
 	pr.CreatedAt = time.Now()
 	pr.UpVotes = 0
 	pr.DownVotes = 0

@@ -41,8 +41,17 @@ func constructEmailInformationFromEvent(event stripe.Event) (EmailInformation, e
 	dateStringFormatted := fmt.Sprint(strings.Split(dateString, "-")[1], "/", strings.Split(dateString, "-")[2], "/", strings.Split(dateString, "-")[0])
 
 	customerId, ok := orderObject["customer"].(string)
+	if !ok {
+		logger.Error("CustomerID could not be retrieved from stripe  webhook event")
+	}
 	orderId, ok := orderObject["id"].(string)
-	order, _ := fetchOrderById(orderId)
+	if !ok {
+		logger.Error("OrderID could not be retrieved from stripe  webhook event")
+	}
+	order, err := fetchOrderById(orderId)
+	if err != nil {
+		logger.Error("Could not get order from id ", err)
+	}
 
 	stripeCustomer, _ := fetchCustomerFromId(customerId)
 	card, _ := fetchCard(customerId, stripeCustomer.DefaultSource.ID)

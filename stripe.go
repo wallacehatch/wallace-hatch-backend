@@ -29,6 +29,58 @@ func init() {
 	stripe.Key = stripeAccessToken
 }
 
+func validateReviewHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var valReviewReq validateReviewRequest
+	err := decoder.Decode(&valReviewReq)
+	if err != nil {
+		logger.Error("Error decoding validate review request", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	prevPurchased := doesCustomerContainPastOrder(valReviewReq.CustomerId, valReviewReq.CustomerId)
+	result := make(map[string]interface{})
+	result["verified_buyer"] = prevPurchased
+	js, _ := json.Marshal(result)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+	return
+
+}
+
+func doesCustomerContainPastOrder(customerId string, productId string) bool {
+
+	pastOrders, _ := fetchCustomerOrders(customerId)
+	prevPurchased := false
+	for _, order := range pastOrders {
+		for _, item := range order.Items {
+			product, _ := fetchProductFromSKU(item.Parent)
+			if product.ID == productId {
+				prevPurchased = true
+			}
+		}
+	}
+	return prevPurchased
+}
+
+func fetchPastOrdersHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	customerId := vars["key"]
+	orders, err := fetchCustomerOrders(customerId)
+	if err != nil {
+		logger.Error("Error getting customer orders", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+
+	js, _ := json.Marshal(orders)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+	return
+
+}
+
 func fetchAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 	params := &stripe.ProductListParams{}
 	products := make([]*stripe.Product, 0)
@@ -59,6 +111,27 @@ func fetchProductByIdHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+
+}
+
+func fetchProductFromSKU(skuId string) (stripe.Product, error) {
+	s, err := sku.Get(skuId, nil)
+	product, err := fetchProductById(s.Product.ID)
+	return product, err
+}
+
+func fetchCustomerOrders(customerId string) ([]stripe.Order, error) {
+	orders := make([]stripe.Order, 0)
+	params := &stripe.OrderListParams{}
+	params.Filters.AddFilter("customer", "", customerId)
+	i := order.List(params)
+	if i.Err() != nil {
+		logger.Error("Error getting customer orders ", i.Err())
+	}
+	for i.Next() {
+		orders = append(orders, *i.Order())
+	}
+	return orders, i.Err()
 
 }
 
