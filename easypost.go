@@ -160,6 +160,7 @@ func constructMessage(hook easypostWebhook) string {
 	mostRecentTrackingMessage := trackingUpdates[newestIndex].Message
 	currentLocation := fmt.Sprint(trackingUpdates[newestIndex].TrackingLocation.City, " ", trackingUpdates[newestIndex].TrackingLocation.State)
 	estimatedArrival := formatDate(hook.Result.EstDeliveryDate)
+	logger.Info("for easypost webhook, most recent tracking message is : ", mostRecentTrackingMessage)
 
 	// we know this is a juicy tracking event that the customer needs to know about
 	switch mostRecentTrackingMessage {
