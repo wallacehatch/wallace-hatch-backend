@@ -82,14 +82,8 @@ func fetchPastOrdersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchAllProductsHandler(w http.ResponseWriter, r *http.Request) {
-	params := &stripe.ProductListParams{}
-	products := make([]*stripe.Product, 0)
-	i := product.List(params)
-	for i.Next() {
-		p := i.Product()
-		products = append(products, p)
 
-	}
+	products := getAllProducts()
 	js, err := json.Marshal(products)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -100,10 +94,23 @@ func fetchAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func getAllProducts() []*stripe.Product {
+	params := &stripe.ProductListParams{}
+	products := make([]*stripe.Product, 0)
+	i := product.List(params)
+	for i.Next() {
+		p := i.Product()
+		products = append(products, p)
+
+	}
+	return products
+
+}
 func fetchProductByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	p, err := product.Get(vars["key"], nil)
+
 	js, err := json.Marshal(p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -224,6 +231,19 @@ func fetchCard(customerId string, cardId string) (stripe.Card, error) {
 
 }
 
+func getProductsFromNames(names []string) []*stripe.Product {
+	products := make([]*stripe.Product, 0)
+	allProducts := getAllProducts()
+	for _, product := range allProducts {
+		for _, name := range names {
+			if product.Name == name {
+				products = append(products, product)
+			}
+		}
+	}
+	return products
+}
+
 func fetchDefaultCard(customerId string) (stripe.Card, error) {
 	c, err := card.Get(
 		"card_1BpiApGPb2UAQvIIulZ82rdM",
@@ -238,23 +258,16 @@ func fetchDefaultCard(customerId string) (stripe.Card, error) {
 
 func fetchProductsByIds(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
+
 	var t idsReqeust
 	err := decoder.Decode(&t)
 	if err != nil {
 		logger.Error("Error fetching product by ids: ", err)
 		return
 	}
-	params := &stripe.ProductListParams{}
-	products := make([]*stripe.Product, 0)
-	i := product.List(params)
 
-	for i.Next() {
-		for _, id := range t.Ids {
-			if i.Product().ID == id {
-				products = append(products, i.Product())
-			}
-		}
-	}
+	products := getProductsFromIds(t.Ids)
+
 	js, err := json.Marshal(products)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -262,6 +275,21 @@ func fetchProductsByIds(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func getProductsFromIds(ids []string) []*stripe.Product {
+	params := &stripe.ProductListParams{}
+	products := make([]*stripe.Product, 0)
+	i := product.List(params)
+
+	for i.Next() {
+		for _, id := range ids {
+			if i.Product().ID == id {
+				products = append(products, i.Product())
+			}
+		}
+	}
+	return products
 }
 
 func updateOrderMeta(orderId string, meta map[string]string) error {

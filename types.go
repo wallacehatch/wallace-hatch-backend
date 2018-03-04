@@ -119,6 +119,77 @@ type validateReviewRequest struct {
 	ProductId  string `json:"product_id"`
 }
 
+type instagramCommentResp struct {
+	Data []struct {
+		ID   string `json:"id"`
+		From struct {
+			ID             string `json:"id"`
+			Username       string `json:"username"`
+			FullName       string `json:"full_name"`
+			ProfilePicture string `json:"profile_picture"`
+		} `json:"from"`
+		Text        string `json:"text"`
+		CreatedTime string `json:"created_time"`
+	} `json:"data"`
+	Meta struct {
+		Code int `json:"code"`
+	} `json:"meta"`
+}
+
+type instagramMediaResp struct {
+	Data struct {
+		Type         string `json:"type"`
+		UsersInPhoto []struct {
+			User struct {
+				Username       string `json:"username"`
+				FullName       string `json:"full_name"`
+				ID             string `json:"id"`
+				ProfilePicture string `json:"profile_picture"`
+			} `json:"user"`
+			Position struct {
+				X float64 `json:"x"`
+				Y float64 `json:"y"`
+			} `json:"position"`
+		} `json:"users_in_photo"`
+		Filter   string        `json:"filter"`
+		Tags     []interface{} `json:"tags"`
+		Comments struct {
+			Count int `json:"count"`
+		} `json:"comments"`
+		Caption interface{} `json:"caption"`
+		Likes   struct {
+			Count int `json:"count"`
+		} `json:"likes"`
+		Link string `json:"link"`
+		User struct {
+			Username       string `json:"username"`
+			FullName       string `json:"full_name"`
+			ProfilePicture string `json:"profile_picture"`
+			ID             string `json:"id"`
+		} `json:"user"`
+		CreatedTime string `json:"created_time"`
+		Images      struct {
+			LowResolution struct {
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+				Height int    `json:"height"`
+			} `json:"low_resolution"`
+			Thumbnail struct {
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+				Height int    `json:"height"`
+			} `json:"thumbnail"`
+			StandardResolution struct {
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+				Height int    `json:"height"`
+			} `json:"standard_resolution"`
+		} `json:"images"`
+		ID       string      `json:"id"`
+		Location interface{} `json:"location"`
+	} `json:"data"`
+}
+
 type easypostWebhook struct {
 	Result struct {
 		ID              string      `json:"id"`
