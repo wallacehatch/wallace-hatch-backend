@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 func init() {
@@ -235,8 +236,10 @@ func getProductsFromNames(names []string) []*stripe.Product {
 	products := make([]*stripe.Product, 0)
 	allProducts := getAllProducts()
 	for _, product := range allProducts {
+		cleanedProductName := cleanString(product.Name)
 		for _, name := range names {
-			if product.Name == name {
+			cleanedName := cleanString(name)
+			if cleanedProductName == cleanedName {
 				products = append(products, product)
 			}
 		}
@@ -599,4 +602,15 @@ func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 	return
 
+}
+
+func cleanString(s string) string {
+	cleanedString := ""
+	for _, char := range s {
+		if unicode.IsLetter(char) {
+			lowercase := strings.ToLower(string(char))
+			cleanedString = fmt.Sprint(cleanedString, lowercase)
+		}
+	}
+	return cleanedString
 }

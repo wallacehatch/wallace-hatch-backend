@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/stripe/stripe-go"
+
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -20,6 +22,8 @@ func init() {
 }
 
 func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request) {
+
+	var data instagramMediaData
 	vars := mux.Vars(r)
 	shortenedUrl := vars["key"]
 	instagramMedia, err := getInstagramMediaInfo(shortenedUrl)
@@ -35,8 +39,11 @@ func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request
 			watchesInshot = append(watchesInshot, tag.(string))
 		}
 	}
+	data.PictureUrl = instagramMedia.Data.Images.StandardResolution.URL
+	data.WallaceHatchProfilePictureUrl = instagramMedia.Data.Images.Thumbnail.URL
+	data.Caption = instagramMedia.Data.Caption.(string)
 
-	fmt.Println(watchesInshot)
+	productsInShot := getProductsFromNames(watchesInshot)
 
 	// comments, err := getInstagramMediaComments(instagramMedia.Data.ID)
 	// logger.Info("Comments!!!! ", comments)
@@ -45,14 +52,14 @@ func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 	return
-
 }
 
 type instagramMediaData struct {
 	PictureUrl                    string
-	wallaceHatchProfilePictureUrl string
-	location                      string
-	caption                       string
+	WallaceHatchProfilePictureUrl string
+	Location                      string
+	Caption                       string
+	products                      []stripe.Product
 }
 
 func getInstagramMediaComments(mediaId string) (instagramCommentResp, error) {
