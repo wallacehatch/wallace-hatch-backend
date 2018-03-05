@@ -25,7 +25,7 @@ after_success:
   - eval $(aws ecr get-login --no-include-email  --region us-east-1) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
   - docker build -t backend .
   - docker tag backend:latest 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend${URL_END}:V_${TRAVIS_BUILD_NUMBER}
-  - docker push 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend
+  - docker push 145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend${URL_END}
   - sed -i -e 's|KUBE_CERTIFICATE_AUTHORITY_DATA|'"${KUBE_CERTIFICATE_AUTHORITY_DATA}"'|g' kubeconfig
   - sed -i -e 's|KUBE_CLIENT_AUTHORITY_DATA|'"${KUBE_CLIENT_AUTHORITY_DATA}"'|g' kubeconfig
   - sed -i -e 's|KUBE_CLIENT_KEY_DATA|'"${KUBE_CLIENT_KEY_DATA}"'|g' kubeconfig
