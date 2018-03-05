@@ -157,6 +157,9 @@ func constructMessage(hook easypostWebhook) string {
 			newestIndex = index
 		}
 	}
+	if len(trackingUpdates) == 0 {
+		return ""
+	}
 	mostRecentTrackingMessage := trackingUpdates[newestIndex].Message
 	currentLocation := fmt.Sprint(trackingUpdates[newestIndex].TrackingLocation.City, " ", trackingUpdates[newestIndex].TrackingLocation.State)
 	estimatedArrival := formatDate(hook.Result.EstDeliveryDate)
