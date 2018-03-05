@@ -40,26 +40,26 @@ func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request
 		}
 	}
 	data.PictureUrl = instagramMedia.Data.Images.StandardResolution.URL
-	data.WallaceHatchProfilePictureUrl = instagramMedia.Data.Images.Thumbnail.URL
-	data.Caption = instagramMedia.Data.Caption.(string)
+	data.WallaceHatchProfilePictureUrl = "https://instagram.fcmh1-1.fna.fbcdn.net/vp/0e5a33e58f4e512e19b038747d8c77f0/5B322027/t51.2885-19/s320x320/23668180_409038379513014_419175815813529600_n.jpg"
+	caption := instagramMedia.Data.Caption.(map[string]interface{})
+
+	data.Caption = caption["text"].(string)
 
 	productsInShot := getProductsFromNames(watchesInshot)
+	data.Products = productsInShot
 
-	// comments, err := getInstagramMediaComments(instagramMedia.Data.ID)
-	// logger.Info("Comments!!!! ", comments)
-
-	js, err := json.Marshal(instagramMedia)
+	js, err := json.Marshal(data)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 	return
 }
 
 type instagramMediaData struct {
-	PictureUrl                    string
-	WallaceHatchProfilePictureUrl string
-	Location                      string
-	Caption                       string
-	products                      []stripe.Product
+	PictureUrl                    string           `json:"pitcure_url"`
+	WallaceHatchProfilePictureUrl string           `json:"wallace_hatch_profile_picture_url"`
+	Location                      string           `json:"location"`
+	Caption                       string           `json:"caption"`
+	Products                      []stripe.Product `json:"products"`
 }
 
 func getInstagramMediaComments(mediaId string) (instagramCommentResp, error) {

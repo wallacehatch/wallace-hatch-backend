@@ -232,15 +232,15 @@ func fetchCard(customerId string, cardId string) (stripe.Card, error) {
 
 }
 
-func getProductsFromNames(names []string) []*stripe.Product {
-	products := make([]*stripe.Product, 0)
+func getProductsFromNames(names []string) []stripe.Product {
+	products := make([]stripe.Product, 0)
 	allProducts := getAllProducts()
 	for _, product := range allProducts {
 		cleanedProductName := cleanString(product.Name)
 		for _, name := range names {
 			cleanedName := cleanString(name)
 			if cleanedProductName == cleanedName {
-				products = append(products, product)
+				products = append(products, *product)
 			}
 		}
 	}
