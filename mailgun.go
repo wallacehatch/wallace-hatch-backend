@@ -20,7 +20,7 @@ const (
 	shippedTag           = "shippedEmail"
 	applyCouponTag       = "applyCouponEmail"
 	domain               = "mg.wallacehatch.com"
-	emailSender          = "info@wallacehatch.com"
+	emailSender          = "Wallace Hatch <orders@wallacehatch.com>"
 )
 
 func init() {
