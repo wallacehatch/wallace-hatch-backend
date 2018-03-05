@@ -29,6 +29,6 @@ after_success:
   - sed -i -e 's|KUBE_USER_PASSWORD|'"${KUBE_USER_PASSWORD}"'|g' kubeconfig
   - /usr/local/bin/kubectl --kubeconfig kubeconfig set image deployment/backend-deployment backend-container=145054867171.dkr.ecr.us-east-1.amazonaws.com/wallace-hatch-backend:V_${TRAVIS_BUILD_NUMBER}
 
-
+# new message
 notifications:
   slack: wallacehatch:l8UAmh5H0RiKbtF7ICvkmSjB
