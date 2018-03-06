@@ -381,7 +381,6 @@ func mapToStripeCustomerParams(account accountRequest) (stripe.CustomerParams, e
 }
 
 func mapToStripeCardParams(cardInfo cardRequest, customer stripe.Customer) (stripe.CardParams, error) {
-	logger.Info(cardInfo)
 	mappedCard := stripe.CardParams{}
 	mappedCard.Number = cardInfo.Number
 	dateSplit := strings.Split(cardInfo.Exp, "/")
