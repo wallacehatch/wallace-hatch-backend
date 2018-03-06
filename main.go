@@ -160,10 +160,3 @@ func respondJson(text string, status int, w http.ResponseWriter) {
 	w.WriteHeader(status)
 	w.Write(jsonResponse)
 }
-
-// mostRecentTrackingMessage := "Out for Delivery"
-// currentLocation := "CHARLESTON SC"
-// estimatedArrival := "Tuesday, February 27"
-// shortenedTrackingLink, _ := shortenUrl("https://track.easypost.com/djE6dHJrX2ZjYTRjZTQyNDk2ZjQ5NjBiODkxNzQzOTQ1YWQ5OGMy")
-// message := fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
-// sendSMSMessage("4403966613", message)
