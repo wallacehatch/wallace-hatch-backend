@@ -92,6 +92,7 @@ func orderConfirmationEmail(event stripe.Event) {
 	}
 	email := Email{}
 	email.Subject = "Order Confirmation"
+	email.PlainText = "Your order has been confirmed!"
 	email.From = emailSender
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
@@ -114,6 +115,7 @@ func orderShippedEmail(event stripe.Event) {
 	}
 	email := Email{}
 	email.Subject = "Order Shipped"
+	email.PlainText = "Your order has been shipped!"
 	email.From = emailSender
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
