@@ -552,7 +552,6 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 // when a customer signs up for the coupon, the are subscribed to our email list and a customer object is created,
 // as well as a hashed coupon code that is emailed to be redemed
 func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
-	logger.Info("coupon signup handler")
 	bufferBytes := bytes.Buffer{}
 	decoder := json.NewDecoder(r.Body)
 	var couponRequest couponSubmitRequest
@@ -593,11 +592,17 @@ func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
 	email.From = emailSender
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
-	MailgunSendEmail(email, applyCouponTag, time.Now())
+	_, err = MailgunSendEmail(email, applyCouponTag, time.Now())
+	if err != nil {
+		logger.Error("Error sending mailgun email for coupon ", err)
+	}
 
-	addToMailchimpNewsletter(couponRequest.Email, "", "")
+	_, err = addToMailchimpNewsletter(couponRequest.Email, "", "")
+	if err != nil {
+		logger.Error("Error adding user to mailchimp newsletter ", err)
+	}
 
-	js, err := json.Marshal(coupon)
+	js, _ := json.Marshal(coupon)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 	return
