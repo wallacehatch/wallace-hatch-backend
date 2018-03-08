@@ -44,7 +44,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/contact-form/", ContactFormHandler).Methods("POST")
-	router.HandleFunc("/email-signup/", EmailSignupHandler).Methods("POST")
+	router.HandleFunc("/newsletter-signup/", NewsletterSignupHandler).Methods("POST")
 	router.HandleFunc("/health-check/", HealthCheckHandler).Methods("GET")
 	router.HandleFunc("/get-all-products/", fetchAllProductsHandler).Methods("GET")
 	router.HandleFunc("/get-products/", fetchProductsByIds).Methods("POST")
@@ -62,6 +62,7 @@ func main() {
 	router.HandleFunc("/validate-review/", fetchPastOrdersHandler).Methods("POST")
 	router.HandleFunc("/instagram-media/{key}", fetchInstagramPostInformationHandler).Methods("GET")
 	handler := c.Handler(router)
+
 	port := ":8090"
 	logger.Info("Serving on ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
@@ -119,7 +120,8 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
+func NewsletterSignupHandler(w http.ResponseWriter, r *http.Request) {
+	logger.Info("NEWSLETTER")
 	err := mailchimp.SetKey(mailchimpAPIKey)
 	emailSignup := EmailSignup{}
 	body, err := ioutil.ReadAll(r.Body)
@@ -131,16 +133,15 @@ func EmailSignupHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &emailSignup)
 	if err != nil {
 		logger.Error("Error decoding email singup form ", err)
-		respondJson("false", http.StatusInternalServerError, w)
+		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-
 	member, err := addToMailchimpNewsletter(emailSignup.Email, "", "")
-
 	if err != nil {
 		logger.Error("Error with mailchimp  on email form", err, member)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
 	}
-
 	respondJson("true", http.StatusOK, w)
 	return
 

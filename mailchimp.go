@@ -5,10 +5,15 @@ import (
 	"github.com/beeker1121/mailchimp-go/lists/members"
 )
 
+const (
+	mailchimpNewsletterListId = "ae8e38bbe3"
+)
+
 func addToMailchimpNewsletter(email string, company string, message string) (members.Member, error) {
 	err := mailchimp.SetKey(mailchimpAPIKey)
 	if err != nil {
 		logger.Error("error connecting to mailchimp api", err)
+		return members.Member{}, err
 	}
 	status := "subscribed"
 	mergeFields := make(map[string]interface{})
@@ -18,9 +23,10 @@ func addToMailchimpNewsletter(email string, company string, message string) (mem
 	params.EmailAddress = email
 	params.MergeFields = mergeFields
 	params.Status = members.Status(status)
-	member, err := members.New("7343633629", params)
+	member, err := members.New(mailchimpNewsletterListId, params)
 	if err != nil {
 		logger.Error("error adding to mailchimp", err)
+		return members.Member{}, err
 	}
 	return *member, err
 }

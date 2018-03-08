@@ -579,7 +579,7 @@ func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
 	emailInfo.To = couponRequest.Email
 	emailInfo.CouponCode = coupon.ID
 	emailInfo.CouponDiscount = int(coupon.Amount)
-	tmpl, err := template.ParseFiles("email-templates/receive-coupon.html")
+	tmpl, err := template.ParseFiles("email-templates/coupon.html")
 	if err != nil {
 		logger.Error("error opening template ", err)
 
