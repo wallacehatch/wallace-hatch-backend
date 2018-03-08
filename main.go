@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	mailchimp "github.com/beeker1121/mailchimp-go"
 	"github.com/beeker1121/mailchimp-go/lists/members"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 // The person Type (more like an object)
@@ -121,7 +124,7 @@ func ContactFormHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewsletterSignupHandler(w http.ResponseWriter, r *http.Request) {
-	logger.Info("NEWSLETTER")
+
 	err := mailchimp.SetKey(mailchimpAPIKey)
 	emailSignup := EmailSignup{}
 	body, err := ioutil.ReadAll(r.Body)
@@ -142,6 +145,28 @@ func NewsletterSignupHandler(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
+
+	bufferBytes := bytes.Buffer{}
+
+	tmpl, err := template.ParseFiles("email-templates/welcome-to-newsletter.html")
+	if err != nil {
+		logger.Error("error opening template ", err)
+	}
+	if err := tmpl.Execute(&bufferBytes, EmailInformation{}); err != nil {
+		logger.Error("error executing html ", err)
+	}
+	email := Email{}
+	email.Subject = "Welcome To Our Newsletter"
+	email.PlainText = "Thanks for joining our newsletter"
+	email.From = emailSender
+	email.To = emailSignup.Email
+	email.Html = bufferBytes.String()
+	_, err = MailgunSendEmail(email, orderConfirmationTag, time.Now())
+	if err != nil {
+		logger.Error("Error sending welcome newsletter email from mailgun ", err)
+
+	}
+
 	respondJson("true", http.StatusOK, w)
 	return
 
