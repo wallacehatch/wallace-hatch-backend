@@ -203,11 +203,12 @@ func createCouponFromEmail(email string) (*stripe.Coupon, error) {
 	hash := getHash(email)
 	couponId := hash[0:6] // shorten to make  more acccesible to user
 	c, err := coupon.New(&stripe.CouponParams{
-		Percent:  15,
-		Duration: "once",
-		ID:       couponId,
+		Percent:     15,
+		Duration:    "once",
+		ID:          couponId,
+		Redemptions: 1,
+		RedeemBy:    int64(time.Now().AddDate(0, 1, 0).Unix()),
 	})
-
 	return c, err
 }
 
@@ -551,6 +552,7 @@ func submitOrder(w http.ResponseWriter, r *http.Request) {
 // when a customer signs up for the coupon, the are subscribed to our email list and a customer object is created,
 // as well as a hashed coupon code that is emailed to be redemed
 func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
+	logger.Info("coupon signup handler")
 	bufferBytes := bytes.Buffer{}
 	decoder := json.NewDecoder(r.Body)
 	var couponRequest couponSubmitRequest
@@ -578,11 +580,10 @@ func couponSignupHandler(w http.ResponseWriter, r *http.Request) {
 	emailInfo := EmailInformation{}
 	emailInfo.To = couponRequest.Email
 	emailInfo.CouponCode = coupon.ID
-	emailInfo.CouponDiscount = int(coupon.Amount)
+	emailInfo.CouponDiscount = int(coupon.Percent)
 	tmpl, err := template.ParseFiles("email-templates/coupon.html")
 	if err != nil {
 		logger.Error("error opening template ", err)
-
 	}
 	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
 		logger.Error("error executing html ", err)
