@@ -64,7 +64,6 @@ type productReviewRequest struct {
 }
 
 func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
-
 	decoder := json.NewDecoder(r.Body)
 	var productReviewReq productReviewRequest
 	err := decoder.Decode(&productReviewReq)
