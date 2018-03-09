@@ -138,3 +138,22 @@ func readProductReviews(productId string, db *mgo.Database) ([]productReview, er
 	return prs, err
 
 }
+
+func validateReviewHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var valReviewReq validateReviewRequest
+	err := decoder.Decode(&valReviewReq)
+	if err != nil {
+		logger.Error("Error decoding validate review request", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+	}
+	prevPurchased := doesCustomerContainPastOrder(valReviewReq.CustomerId, valReviewReq.ProductId)
+	result := make(map[string]interface{})
+	result["verified_buyer"] = prevPurchased
+	js, _ := json.Marshal(result)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+	return
+
+}
