@@ -55,7 +55,7 @@ func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request
 }
 
 type instagramMediaData struct {
-	PictureUrl                    string           `json:"pitcure_url"`
+	PictureUrl                    string           `json:"picture_url"`
 	WallaceHatchProfilePictureUrl string           `json:"wallace_hatch_profile_picture_url"`
 	Location                      string           `json:"location"`
 	Caption                       string           `json:"caption"`
