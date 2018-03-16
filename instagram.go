@@ -46,6 +46,10 @@ func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request
 	data.Caption = caption["text"].(string)
 
 	productsInShot := getProductsFromNames(watchesInshot)
+	// if none is found, defualt to soho
+	// if len(productsInShot) == 0 {
+	//
+	// }
 	data.Products = productsInShot
 
 	js, err := json.Marshal(data)
@@ -67,7 +71,6 @@ func getInstagramMediaComments(mediaId string) (instagramCommentResp, error) {
 	var msg instagramCommentResp
 	client := &http.Client{}
 	url := fmt.Sprint(instagramApiBaseURL, "media/", mediaId, "/comments?access_token=", instagramAccessToken)
-	logger.Info("url is : -> ", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		logger.Error("Error with instagram url request", err)
