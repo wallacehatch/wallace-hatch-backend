@@ -60,7 +60,7 @@ type productReviewRequest struct {
 	StarRating    float32 `json:"star_rating" bson:"star_rating"`
 	ReviewTitle   string  `json:"review_title" bson:"review_title"`
 	ReviewMessage string  `json:"review_message" bson:"review_message"`
-	CustomerId    string  `json:"customer_id" bson:"customer_id"`
+	CustomerEmail string  `json:"customer_email" bson:"customer_email"`
 }
 
 func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,16 +72,15 @@ func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	customer, _ := fetchCustomerFromId(productReviewReq.CustomerId)
-
-	prevPurchased := doesCustomerContainPastOrder(customer.ID, productReviewReq.ProductId)
-
-	if !prevPurchased {
-		err := errors.New("User has not purchased this product before, and therefore cannnot leave a review")
-		logger.Error("User has not purchased this product before", err)
+	_, err = validateCustomerReview(productReviewReq.CustomerEmail, productReviewReq.ProductId)
+	if err != nil {
+		logger.Error("Customer is not validated: ", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
+
 	}
+
+	customer, _ := getCustomerFromEmail(productReviewReq.CustomerEmail)
 
 	db := db()
 	defer db.Session.Close()
@@ -139,6 +138,7 @@ func readProductReviews(productId string, db *mgo.Database) ([]productReview, er
 }
 
 func validateReviewHandler(w http.ResponseWriter, r *http.Request) {
+	logger.Info("validating revuew")
 	decoder := json.NewDecoder(r.Body)
 	var valReviewReq validateReviewRequest
 	err := decoder.Decode(&valReviewReq)
@@ -147,12 +147,41 @@ func validateReviewHandler(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
-	prevPurchased := doesCustomerContainPastOrder(valReviewReq.CustomerId, valReviewReq.ProductId)
+	logger.Info("valReviewReq.CustomerEmail")
+	validatedReview, err := validateCustomerReview(valReviewReq.CustomerEmail, valReviewReq.ProductId)
+	if err != nil {
+		logger.Error("Customer is probably not validated: ", err)
+		respondErrorJson(err, http.StatusBadRequest, w)
+		return
+
+	}
 	result := make(map[string]interface{})
-	result["verified_buyer"] = prevPurchased
+	result["verified_buyer"] = validatedReview
 	js, _ := json.Marshal(result)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+	logger.Info("was verified!")
 	return
 
+}
+
+// determines if user is qualifed to create and leave review
+func validateCustomerReview(email string, productId string) (bool, error) {
+	db := db()
+	defer db.Session.Close()
+	customer, err := getCustomerFromEmail(email)
+	if err != nil {
+		return false, errors.New("No customer found with provided email")
+	}
+	reviews, _ := readProductReviews(productId, db)
+	prevPurchased := doesCustomerContainPastOrder(customer.ID, productId)
+	if !prevPurchased {
+		return false, errors.New("Customer with provided email has never purchased product before")
+	}
+	for _, rev := range reviews {
+		if rev.CustomerEmail == email {
+			return false, errors.New("Customer with provided email has already left a review for this product")
+		}
+	}
+	return true, nil
 }

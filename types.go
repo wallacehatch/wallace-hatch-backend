@@ -115,8 +115,8 @@ type idsReqeust struct {
 }
 
 type validateReviewRequest struct {
-	CustomerId string `json:"customer_id"`
-	ProductId  string `json:"product_id"`
+	ProductId     string `json:"product_id"`
+	CustomerEmail string `json:"customer_email"`
 }
 
 type instagramCommentResp struct {

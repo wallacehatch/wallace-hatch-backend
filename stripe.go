@@ -45,6 +45,23 @@ func doesCustomerContainPastOrder(customerId string, productId string) bool {
 	return false
 }
 
+func getCustomerFromEmail(email string) (*stripe.Customer, error) {
+
+	params := &stripe.CustomerListParams{}
+	params.Filters.AddFilter("email", "", email)
+	i := customer.List(params)
+	if i.Err() != nil {
+		logger.Error("Error fetching customer from email ", i.Err())
+		return &stripe.Customer{}, errors.New("No customer with email found")
+	}
+	if !i.Next() {
+		logger.Error("Error fetching customer from email, i.next was false  ", i.Err())
+		return &stripe.Customer{}, errors.New("No customer with email found")
+	}
+	return i.Customer(), nil
+
+}
+
 func fetchPastOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	customerId := vars["key"]
@@ -227,18 +244,6 @@ func getProductsFromNames(names []string) []stripe.Product {
 		}
 	}
 	return products
-}
-
-func fetchDefaultCard(customerId string) (stripe.Card, error) {
-	c, err := card.Get(
-		"card_1BpiApGPb2UAQvIIulZ82rdM",
-		&stripe.CardParams{Customer: "cus_CEAV0uH4PaskMF"},
-	)
-	if err != nil {
-		logger.Error("Error fetching default card", err)
-	}
-	return *c, err
-
 }
 
 func fetchProductsByIds(w http.ResponseWriter, r *http.Request) {
