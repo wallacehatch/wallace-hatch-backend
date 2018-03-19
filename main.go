@@ -72,7 +72,6 @@ func main() {
 }
 
 func testTwilioHandler(w http.ResponseWriter, r *http.Request) {
-	logger.Info("Testing twilio webhook")
 	message := "Hey Greg - this message means twilio is working on production servers for wally 🤘"
 	twilio, err := sendSMSMessage("4403966613", message)
 	if err != nil {

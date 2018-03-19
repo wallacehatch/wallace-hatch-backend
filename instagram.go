@@ -47,11 +47,11 @@ func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request
 
 	productsInShot := getProductsFromNames(watchesInshot)
 
-	// if none is found, defualt to soho
+	// if none is found, defualt to kallio rose
 	if len(productsInShot) == 0 {
 		productsInShot = getProductsFromNames([]string{"kalliorose"})
-
 	}
+
 	data.Products = productsInShot
 
 	js, err := json.Marshal(data)
