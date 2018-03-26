@@ -41,9 +41,17 @@ func fetchInstagramPostInformationHandler(w http.ResponseWriter, r *http.Request
 	}
 	data.PictureUrl = instagramMedia.Data.Images.StandardResolution.URL
 	data.WallaceHatchProfilePictureUrl = "https://instagram.fcmh1-1.fna.fbcdn.net/vp/0e5a33e58f4e512e19b038747d8c77f0/5B322027/t51.2885-19/s320x320/23668180_409038379513014_419175815813529600_n.jpg"
-	caption := instagramMedia.Data.Caption.(map[string]interface{})
+
+	caption, ok := instagramMedia.Data.Caption.(map[string]interface{})
+	if !ok {
+		logger.Error("Error with instagram media ", instagramMedia.Data.Location)
+	}
 
 	data.Caption = caption["text"].(string)
+	loc, ok := instagramMedia.Data.Location.(map[string]interface{})
+	if ok {
+		data.Location = loc["name"].(string)
+	}
 
 	productsInShot := getProductsFromNames(watchesInshot)
 
@@ -105,7 +113,7 @@ func getInstagramMediaInfo(shortenUrl string) (instagramMediaResp, error) {
 	var msg instagramMediaResp
 	client := &http.Client{}
 	url := fmt.Sprint(instagramApiBaseURL, "media/shortcode/", shortenUrl, "?access_token=", instagramAccessToken)
-	logger.Info("url is : -> ", url)
+	logger.Info("url is : ", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		logger.Error("Error with instagram url request", err)
