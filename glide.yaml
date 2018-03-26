@@ -25,3 +25,7 @@ import:
 - package: gopkg.in/mgo.v2
   subpackages:
   - bson
+- package: github.com/Vorkytaka/instagram-go-scraper
+  version: ^0.2.3
+  subpackages:
+  - instagram

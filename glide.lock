@@ -1,5 +1,5 @@
-hash: 1fa0d32f26ccb5fabd867ab9ca354f978a36fcb00087a28a05548a0dee372f2e
-updated: 2018-02-28T13:13:22.702219-05:00
+hash: 0cf47a1cdb17b7faccd7548058249d82b56620f4036cb184c9a22b0a87a9df51
+updated: 2018-03-26T08:52:58.673042-04:00
 imports:
 - name: github.com/beeker1121/mailchimp-go
   version: 7c5f827423b2a08c0cb05f6a79ea9fec1d2eb257
@@ -17,7 +17,7 @@ imports:
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gregm711/easypost-go
-  version: fe169b70c0140f8994416a470c09fadece4fb886
+  version: f2d053adeb30a0ad5b40d39c2286a1fb0a1bbdb5
   subpackages:
   - easypost
   - fake
@@ -30,7 +30,7 @@ imports:
 - name: github.com/sfreiberg/gotwilio
   version: 58125ef28e4b5d7ab5328593099ae8cac5fcf6a2
 - name: github.com/sirupsen/logrus
-  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
+  version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
 - name: github.com/stripe/stripe-go
   version: c7c700f9a469299d3577b57bb9a970d005cfee6c
   subpackages:
@@ -48,6 +48,10 @@ imports:
   version: c099f663e1c235176c175644792c5eb282017ad7
 - name: github.com/ttacon/libphonenumber
   version: f9c5ddf85ffa9cc802cb511f9ab4733d7d8fbb0e
+- name: github.com/Vorkytaka/instagram-go-scraper
+  version: c6b60913c89162c054f6219b78ba11bd4ce5d65b
+  subpackages:
+  - instagram
 - name: golang.org/x/crypto
   version: bd6f299fb381e4c3393d1c4b1f0b94f5e77650c8
   subpackages:
