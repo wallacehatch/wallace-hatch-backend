@@ -15,6 +15,7 @@ var (
 	mailgunPublicKey    string
 )
 
+// vest-production-shard-00-00-czho7.mongodb.net
 const (
 	orderConfirmationTag = "orderConfirmationEmail"
 	shippedTag           = "shippedEmail"

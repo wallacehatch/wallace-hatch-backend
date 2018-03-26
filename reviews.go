@@ -43,24 +43,28 @@ func db() *mgo.Database {
 }
 
 type productReview struct {
-	ProductId     string    `json:"product_id" bson:"product_id"`
-	StarRating    float32   `json:"star_rating" bson:"star_rating"`
-	ReviewTitle   string    `json:"review_title" bson:"review_title"`
-	ReviewMessage string    `json:"review_message" bson:"review_message"`
-	CustomerId    string    `json:"customer_id" bson:"customer_id"`
-	CustomerName  string    `json:"customer_name" bson:"customer_name"`
-	CustomerEmail string    `json:"customer_email" bson:"customer_email"`
-	CreatedAt     time.Time `json:"created_at" bson:"created_at"`
-	UpVotes       int       `json:"up_votes" bson:"up_votes"`
-	DownVotes     int       `json:"down_votes" bson:"down_votes"`
+	ProductId                   string    `json:"product_id" bson:"product_id"`
+	StarRating                  float32   `json:"star_rating" bson:"star_rating"`
+	ReviewTitle                 string    `json:"review_title" bson:"review_title"`
+	ReviewMessage               string    `json:"review_message" bson:"review_message"`
+	CustomerId                  string    `json:"customer_id" bson:"customer_id"`
+	CustomerName                string    `json:"customer_name" bson:"customer_name"`
+	CustomerEmail               string    `json:"customer_email" bson:"customer_email"`
+	CreatedAt                   time.Time `json:"created_at" bson:"created_at"`
+	FriendRecommendation        bool      `json:"friend_recommendation" bson:"friend_recommendation"`
+	FriendRecommendationRating  float32   `json:"friend_recommendation_rating" bson:"friend_recommendation_rating"`
+	FriendRecommendationMessage string    `json:"friend_recommendation_message" bson:"friend_recommendation_message"`
 }
 
 type productReviewRequest struct {
-	ProductId     string  `json:"product_id" bson:"product_id"`
-	StarRating    float32 `json:"star_rating" bson:"star_rating"`
-	ReviewTitle   string  `json:"review_title" bson:"review_title"`
-	ReviewMessage string  `json:"review_message" bson:"review_message"`
-	CustomerEmail string  `json:"customer_email" bson:"customer_email"`
+	ProductId                   string  `json:"product_id" bson:"product_id"`
+	StarRating                  float32 `json:"star_rating" bson:"star_rating"`
+	ReviewTitle                 string  `json:"review_title" bson:"review_title"`
+	ReviewMessage               string  `json:"review_message" bson:"review_message"`
+	CustomerEmail               string  `json:"customer_email" bson:"customer_email"`
+	FriendRecommendation        bool    `json:"friend_recommendation" bson:"friend_recommendation"`
+	FriendRecommendationRating  float32 `json:"friend_recommendation_rating" bson:"friend_recommendation_rating"`
+	FriendRecommendationMessage string  `json:"friend_recommendation_message" bson:"friend_recommendation_message"`
 }
 
 func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
@@ -93,8 +97,9 @@ func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
 	pr.CustomerName = customer.Meta["name"]
 	pr.CustomerEmail = customer.Email
 	pr.CreatedAt = time.Now()
-	pr.UpVotes = 0
-	pr.DownVotes = 0
+	pr.FriendRecommendation = productReviewReq.FriendRecommendation
+	pr.FriendRecommendationRating = productReviewReq.FriendRecommendationRating
+	pr.FriendRecommendationMessage = productReviewReq.FriendRecommendationMessage
 
 	err = db.C(collectionName).Insert(pr)
 	if err != nil {
@@ -184,4 +189,10 @@ func validateCustomerReview(email string, productId string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func deleteAllReviews() {
+	db := db()
+	defer db.Session.Close()
+
 }
