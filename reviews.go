@@ -42,6 +42,21 @@ func db() *mgo.Database {
 	return session.Clone().DB(dbName)
 }
 
+type productReviewResp struct {
+	ProductId                   string    `json:"product_id" bson:"product_id"`
+	StarRating                  float32   `json:"star_rating" bson:"star_rating"`
+	ReviewTitle                 string    `json:"review_title" bson:"review_title"`
+	ReviewMessage               string    `json:"review_message" bson:"review_message"`
+	CustomerReviews             int       `json:"customer_reviews" bson:"customer_reviews"`
+	CustomerId                  string    `json:"customer_id" bson:"customer_id"`
+	CustomerName                string    `json:"customer_name" bson:"customer_name"`
+	CustomerEmail               string    `json:"customer_email" bson:"customer_email"`
+	CreatedAt                   time.Time `json:"created_at" bson:"created_at"`
+	FriendRecommendation        bool      `json:"friend_recommendation" bson:"friend_recommendation"`
+	FriendRecommendationRating  float32   `json:"friend_recommendation_rating" bson:"friend_recommendation_rating"`
+	FriendRecommendationMessage string    `json:"friend_recommendation_message" bson:"friend_recommendation_message"`
+}
+
 type productReview struct {
 	ProductId                   string    `json:"product_id" bson:"product_id"`
 	StarRating                  float32   `json:"star_rating" bson:"star_rating"`
@@ -124,10 +139,30 @@ func fetchProductReviewsHandler(w http.ResponseWriter, r *http.Request) {
 		logger.Error("Error retireving product reviews", err)
 		respondErrorJson(err, http.StatusBadRequest, w)
 	}
+
+	productReviewsResponse := make([]productReviewResp, 0)
 	js, _ := json.Marshal(productReviews)
+	json.Unmarshal(js, &productReviewsResponse)
+
+	for index, review := range productReviewsResponse {
+		customerReviews, _ := readCustomerReviews(review.CustomerId, db)
+		productReviewsResponse[index].CustomerReviews = len(customerReviews)
+	}
+
+	jsResp, _ := json.Marshal(productReviewsResponse)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	w.Write(jsResp)
 	return
+}
+
+func readCustomerReviews(customerId string, db *mgo.Database) ([]productReview, error) {
+	prs := make([]productReview, 0)
+	err := db.C(collectionName).Find(bson.M{"customer_id": customerId}).All(&prs)
+	if err != nil {
+		logger.Error("Erorr getting reviews by customer id ", err)
+	}
+	return prs, err
+
 }
 
 // Finds existing budget tied to user, if none exists it creates an empty budget and will return the newly created budget
@@ -136,7 +171,7 @@ func readProductReviews(productId string, db *mgo.Database) ([]productReview, er
 	prs := make([]productReview, 0)
 	err := db.C(collectionName).Find(bson.M{"product_id": productId}).All(&prs)
 	if err != nil {
-		logger.Error("Erorr getting all reviews ", err)
+		logger.Error("Erorr getting reviews by product id reviews ", err)
 	}
 	return prs, err
 
