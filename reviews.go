@@ -54,28 +54,28 @@ type productReviewResp struct {
 }
 
 type productReview struct {
-	ProductId                   string    `json:"product_id" bson:"product_id"`
-	StarRating                  float32   `json:"star_rating" bson:"star_rating"`
-	ReviewTitle                 string    `json:"review_title" bson:"review_title"`
-	ReviewMessage               string    `json:"review_message" bson:"review_message"`
-	CustomerId                  string    `json:"customer_id" bson:"customer_id"`
-	CustomerName                string    `json:"customer_name" bson:"customer_name"`
-	CustomerEmail               string    `json:"customer_email" bson:"customer_email"`
-	CreatedAt                   time.Time `json:"created_at" bson:"created_at"`
-	FriendRecommendation        bool      `json:"friend_recommendation" bson:"friend_recommendation"`
-	FriendRecommendationRating  float32   `json:"friend_recommendation_rating" bson:"friend_recommendation_rating"`
-	FriendRecommendationMessage string    `json:"friend_recommendation_message" bson:"friend_recommendation_message"`
+	ProductId            string    `json:"product_id" bson:"product_id"`
+	StarRating           float32   `json:"star_rating" bson:"star_rating"`
+	ReviewTitle          string    `json:"review_title" bson:"review_title"`
+	ReviewMessage        string    `json:"review_message" bson:"review_message"`
+	CustomerId           string    `json:"customer_id" bson:"customer_id"`
+	CustomerName         string    `json:"customer_name" bson:"customer_name"`
+	CustomerEmail        string    `json:"customer_email" bson:"customer_email"`
+	CreatedAt            time.Time `json:"created_at" bson:"created_at"`
+	FriendRecommendation bool      `json:"friend_recommendation" bson:"friend_recommendation"`
+	BrandRating          float32   `json:"brand_rating" bson:"brand_rating"`
+	BrandRatingMessage   string    `json:"brand_rating_message" bson:"brand_rating_message"`
 }
 
 type productReviewRequest struct {
-	ProductId                   string  `json:"product_id" bson:"product_id"`
-	StarRating                  float32 `json:"star_rating" bson:"star_rating"`
-	ReviewTitle                 string  `json:"review_title" bson:"review_title"`
-	ReviewMessage               string  `json:"review_message" bson:"review_message"`
-	CustomerEmail               string  `json:"customer_email" bson:"customer_email"`
-	FriendRecommendation        bool    `json:"friend_recommendation" bson:"friend_recommendation"`
-	FriendRecommendationRating  float32 `json:"friend_recommendation_rating" bson:"friend_recommendation_rating"`
-	FriendRecommendationMessage string  `json:"friend_recommendation_message" bson:"friend_recommendation_message"`
+	ProductId            string  `json:"product_id" bson:"product_id"`
+	StarRating           float32 `json:"star_rating" bson:"star_rating"`
+	ReviewTitle          string  `json:"review_title" bson:"review_title"`
+	ReviewMessage        string  `json:"review_message" bson:"review_message"`
+	CustomerEmail        string  `json:"customer_email" bson:"customer_email"`
+	FriendRecommendation bool    `json:"friend_recommendation" bson:"friend_recommendation"`
+	BrandRating          float32 `json:"brand_rating" bson:"brand_rating"`
+	BrandRatingMessage   string  `json:"brand_rating_message" bson:"brand_rating_message"`
 }
 
 func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,8 +109,8 @@ func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
 	pr.CustomerEmail = customer.Email
 	pr.CreatedAt = time.Now()
 	pr.FriendRecommendation = productReviewReq.FriendRecommendation
-	pr.FriendRecommendationRating = productReviewReq.FriendRecommendationRating
-	pr.FriendRecommendationMessage = productReviewReq.FriendRecommendationMessage
+	pr.BrandRating = productReviewReq.BrandRating
+	pr.BrandRatingMessage = productReviewReq.BrandRatingMessage
 
 	err = db.C(collectionName).Insert(pr)
 	if err != nil {
