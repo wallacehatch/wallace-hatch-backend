@@ -43,18 +43,14 @@ func db() *mgo.Database {
 }
 
 type productReviewResp struct {
-	ProductId                   string    `json:"product_id" bson:"product_id"`
-	StarRating                  float32   `json:"star_rating" bson:"star_rating"`
-	ReviewTitle                 string    `json:"review_title" bson:"review_title"`
-	ReviewMessage               string    `json:"review_message" bson:"review_message"`
-	CustomerReviews             int       `json:"customer_reviews" bson:"customer_reviews"`
-	CustomerId                  string    `json:"customer_id" bson:"customer_id"`
-	CustomerName                string    `json:"customer_name" bson:"customer_name"`
-	CustomerEmail               string    `json:"customer_email" bson:"customer_email"`
-	CreatedAt                   time.Time `json:"created_at" bson:"created_at"`
-	FriendRecommendation        bool      `json:"friend_recommendation" bson:"friend_recommendation"`
-	FriendRecommendationRating  float32   `json:"friend_recommendation_rating" bson:"friend_recommendation_rating"`
-	FriendRecommendationMessage string    `json:"friend_recommendation_message" bson:"friend_recommendation_message"`
+	ProductId       string    `json:"product_id" bson:"product_id"`
+	StarRating      float32   `json:"star_rating" bson:"star_rating"`
+	ReviewTitle     string    `json:"review_title" bson:"review_title"`
+	ReviewMessage   string    `json:"review_message" bson:"review_message"`
+	CustomerReviews int       `json:"customer_reviews" bson:"customer_reviews"`
+	CustomerId      string    `json:"customer_id" bson:"customer_id"`
+	CustomerName    string    `json:"customer_name" bson:"customer_name"`
+	CreatedAt       time.Time `json:"created_at" bson:"created_at"`
 }
 
 type productReview struct {
@@ -178,7 +174,6 @@ func readProductReviews(productId string, db *mgo.Database) ([]productReview, er
 }
 
 func validateReviewHandler(w http.ResponseWriter, r *http.Request) {
-	logger.Info("validating revuew")
 	decoder := json.NewDecoder(r.Body)
 	var valReviewReq validateReviewRequest
 	err := decoder.Decode(&valReviewReq)
