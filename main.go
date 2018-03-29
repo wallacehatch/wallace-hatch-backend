@@ -65,7 +65,6 @@ func main() {
 	router.HandleFunc("/validate-review/", validateReviewHandler).Methods("POST")
 	router.HandleFunc("/instagram-media/{key}", fetchInstagramPostInformationHandler).Methods("GET")
 	handler := c.Handler(router)
-
 	port := ":8090"
 	logger.Info("Serving on ", port)
 	logger.Fatal(http.ListenAndServe(port, handler))
