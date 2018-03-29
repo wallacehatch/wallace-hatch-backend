@@ -43,14 +43,15 @@ func db() *mgo.Database {
 }
 
 type productReviewResp struct {
-	ProductId       string    `json:"product_id" bson:"product_id"`
-	StarRating      float32   `json:"star_rating" bson:"star_rating"`
-	ReviewTitle     string    `json:"review_title" bson:"review_title"`
-	ReviewMessage   string    `json:"review_message" bson:"review_message"`
-	CustomerReviews int       `json:"customer_reviews" bson:"customer_reviews"`
-	CustomerId      string    `json:"customer_id" bson:"customer_id"`
-	CustomerName    string    `json:"customer_name" bson:"customer_name"`
-	CreatedAt       time.Time `json:"created_at" bson:"created_at"`
+	ProductId            string    `json:"product_id" bson:"product_id"`
+	StarRating           float32   `json:"star_rating" bson:"star_rating"`
+	ReviewTitle          string    `json:"review_title" bson:"review_title"`
+	ReviewMessage        string    `json:"review_message" bson:"review_message"`
+	CustomerReviews      int       `json:"customer_reviews" bson:"customer_reviews"`
+	CustomerId           string    `json:"customer_id" bson:"customer_id"`
+	CustomerName         string    `json:"customer_name" bson:"customer_name"`
+	CreatedAt            time.Time `json:"created_at" bson:"created_at"`
+	FriendRecommendation bool      `json:"friend_recommendation" bson:"friend_recommendation"`
 }
 
 type productReview struct {
@@ -220,7 +221,6 @@ func validateCustomerReview(email string, productId string) (bool, error) {
 	}
 	return true, nil
 }
-
 func deleteAllReviews() {
 	db := db()
 	defer db.Session.Close()
