@@ -96,7 +96,10 @@ func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	customer, _ := getCustomerFromEmail(productReviewReq.CustomerEmail)
+	customer, err := getCustomerFromEmail(productReviewReq.CustomerEmail)
+	if err != nil {
+		logger.Error("Error getting customer ", err)
+	}
 
 	db := db()
 	defer db.Session.Close()
