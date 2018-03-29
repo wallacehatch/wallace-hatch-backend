@@ -210,16 +210,16 @@ func validateCustomerReview(email string, productId string) (bool, error) {
 	defer db.Session.Close()
 	customer, err := getCustomerFromEmail(email)
 	if err != nil {
-		return false, errors.New("No customer found with provided email")
+		return false, errors.New("No customers found for this email.")
 	}
 	reviews, _ := readProductReviews(productId, db)
 	prevPurchased := doesCustomerContainPastOrder(customer.ID, productId)
 	if !prevPurchased {
-		return false, errors.New("Customer with provided email has never purchased product before")
+		return false, errors.New("Incorrect order email, this email has never purchased this product before.")
 	}
 	for _, rev := range reviews {
 		if rev.CustomerEmail == email {
-			return false, errors.New("Customer with provided email has already left a review for this product")
+			return false, errors.New("This email has already left a review for this product.")
 		}
 	}
 	return true, nil
