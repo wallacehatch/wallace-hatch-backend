@@ -126,7 +126,7 @@ func orderDeliveredEmail(order stripe.Order) {
 	bufferBytes := bytes.Buffer{}
 	emailInfo, _ := constructEmailInformationFromOrder(order)
 	emailInfo.NumItemsMinus = emailInfo.NumItems - 1
-	tmpl, err := template.ParseFiles("email-templates/order-shipped.html")
+	tmpl, err := template.ParseFiles("email-templates/order-delivered.html")
 	if err != nil {
 		logger.Error("error opening template ", err)
 
