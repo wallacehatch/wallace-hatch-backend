@@ -145,9 +145,14 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 		logger.Error("Error fetching customer from ID", err)
 	}
 	logger.Info(customer.Meta["allowTexting"], customer.Meta["phone"])
+	message, stage := constructMessage(hook)
+
+	//time to send email
+	if stage == "delivered" {
+
+	}
 	// customer wants to get information via sms on tracking
 	if customer.Meta["allowTexting"] == "true" && customer.Meta["phone"] != "" {
-		message := constructMessage(hook)
 		if message != "" {
 			response, err := sendSMSMessage(customer.Meta["phone"], message)
 			logger.Info(response, err)

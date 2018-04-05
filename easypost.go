@@ -147,7 +147,8 @@ func buyShipment(shipment easypost.Shipment) (easypost.Shipment, error) {
 
 }
 
-func constructMessage(hook easypostWebhook) string {
+// reutrns message and event status
+func constructMessage(hook easypostWebhook) (string, string) {
 
 	shortenedTrackingLink, _ := shortenUrl(hook.Result.PublicURL)
 	trackingUpdates := hook.Result.TrackingDetails
@@ -158,7 +159,7 @@ func constructMessage(hook easypostWebhook) string {
 		}
 	}
 	if len(trackingUpdates) == 0 {
-		return ""
+		return "", ""
 	}
 	mostRecentTrackingMessage := trackingUpdates[newestIndex].Message
 	currentLocation := fmt.Sprint(trackingUpdates[newestIndex].TrackingLocation.City, " ", trackingUpdates[newestIndex].TrackingLocation.State)
@@ -168,17 +169,17 @@ func constructMessage(hook easypostWebhook) string {
 	// we know this is a juicy tracking event that the customer needs to know about
 	switch mostRecentTrackingMessage {
 	case "Arrived at USPS Origin Facility":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink), "arrived at origin facility"
 	case "Arrived at Post Office":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink), "arrived at post office"
 	case "Out for Delivery":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink)
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 is on it's way!\n\nCurrent location 📍 ", currentLocation, "\n\nEstimated delivery 📅 ", estimatedArrival, ".\n\nTrack at ", shortenedTrackingLink), "out for delivery"
 	case "Delivered, Front Door/Porch":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉")
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉"), "delivered"
 	case "Delivered, In/At Mailbox":
-		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉")
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉"), "delivered"
 	}
-	return ""
+	return "", ""
 
 }
 
