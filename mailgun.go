@@ -34,8 +34,83 @@ func nameParser(fullName string) (firsName string, lastName string) {
 	return splits[0], splits[len(splits)-1]
 }
 
+func constructEmailInformationFromOrder(order stripe.Order) (EmailInformation, error) {
+	emailInfo := EmailInformation{}
+
+	createdAt := order.Created
+	dateString := time.Unix(createdAt, 0).Format("2006-01-02")
+	dateStringFormatted := fmt.Sprint(strings.Split(dateString, "-")[1], "/", strings.Split(dateString, "-")[2], "/", strings.Split(dateString, "-")[0])
+
+	stripeCustomer, _ := fetchCustomerFromId(order.Customer.ID)
+	card, _ := fetchCard(order.Customer.ID, stripeCustomer.DefaultSource.ID)
+
+	emailInfo.To = stripeCustomer.Email
+	emailInfo.CardMask = card.LastFour
+	emailInfo.CardType = string(card.Brand)
+
+	switch emailInfo.CardType {
+	case "Visa":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/visa%403x.png"
+	case "Mastercard":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/mastercard%403x.png"
+	case "Discover":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/discover%403x.png"
+	case "American Express":
+		emailInfo.CardImageUrl = "https://s3.us-east-2.amazonaws.com/wallace-hatch/amex%403x.png"
+	}
+
+	emailInfo.OrderDate = dateStringFormatted
+	emailInfo.Shipping.Address = order.Shipping.Address.Line1
+	emailInfo.Shipping.City = order.Shipping.Address.City
+	emailInfo.Shipping.State = order.Shipping.Address.State
+	emailInfo.Shipping.Zip = order.Shipping.Address.Zip
+
+	shippingId, ok := order.Meta["shipment_id"]
+	if ok {
+		easypostShipment, _ := fetchShipmentFromId(shippingId)
+		emailInfo.Shipping.EstimatedArrival = "4-7"
+		emailInfo.Shipping.TrackingCarrier = easypostShipment.Tracker.Carrier
+		emailInfo.Shipping.TrackingNumber = easypostShipment.TrackingCode
+		emailInfo.Shipping.TrackingUrl = easypostShipment.Tracker.PublicURL
+	}
+	items := order.Items
+	numItems := 0
+	emailItems := make([]EmailItemInformation, 0)
+	for _, item := range items {
+
+		if item.Type == "sku" {
+			emailItem := EmailItemInformation{}
+			skuInfo, _ := fetchSkuById(item.Parent)
+			emailItem.Size = fmt.Sprint(skuInfo.Attrs["size"], "MM")
+			emailItem.ImageUrl = skuInfo.Image
+			emailItem.Price = float64(skuInfo.Price) / 100.0
+			productInfo, _ := fetchProductById(skuInfo.Product.ID)
+			emailItem.Color = productInfo.Meta["caseColor"]
+
+			emailItem.Style = item.Parent
+
+			emailItem.Name = item.Description
+
+			emailItem.Quantity = int(item.Quantity)
+			numItems = numItems + int(item.Quantity)
+			emailItems = append(emailItems, emailItem)
+		}
+	}
+
+	emailInfo.Items = emailItems
+	emailInfo.NumItems = numItems
+	firstName, _ := nameParser(order.Shipping.Name)
+	emailInfo.FirstName = firstName
+	emailInfo.OrderNumber = strings.Replace(order.ID, "or_", "", -1)
+	emailInfo.OrderTotal = float64(order.Amount) / 100.0
+
+	return emailInfo, nil
+
+}
+
 func constructEmailInformationFromEvent(event stripe.Event) (EmailInformation, error) {
 	emailInfo := EmailInformation{}
+
 	orderObject := event.Data.Obj
 	createdAt := int64(orderObject["created"].(float64))
 	dateString := time.Unix(createdAt, 0).Format("2006-01-02")

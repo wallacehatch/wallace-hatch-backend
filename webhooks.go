@@ -122,6 +122,29 @@ func orderShippedEmail(event stripe.Event) {
 	MailgunSendEmail(email, shippedTag, time.Now())
 }
 
+func orderDeliveredEmail(order stripe.Order) {
+	bufferBytes := bytes.Buffer{}
+	emailInfo, _ := constructEmailInformationFromOrder(order)
+	emailInfo.NumItemsMinus = emailInfo.NumItems - 1
+	tmpl, err := template.ParseFiles("email-templates/order-shipped.html")
+	if err != nil {
+		logger.Error("error opening template ", err)
+
+	}
+	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
+		logger.Error("error executing html ", err)
+
+	}
+	email := Email{}
+	email.Subject = "Order Shipped"
+	email.PlainText = "Your order has been shipped!"
+	email.From = emailSender
+	email.To = emailInfo.To
+	email.Html = bufferBytes.String()
+	MailgunSendEmail(email, shippedTag, time.Now())
+
+}
+
 func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	logger.Info("received webhook for easyopst:")
 	var hook easypostWebhook
@@ -149,7 +172,7 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 
 	//time to send email
 	if stage == "delivered" {
-
+		orderDeliveredEmail(order)
 	}
 	// customer wants to get information via sms on tracking
 	if customer.Meta["allowTexting"] == "true" && customer.Meta["phone"] != "" {
