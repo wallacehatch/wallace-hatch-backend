@@ -172,7 +172,8 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 
 	//time to send email
 	if stage == "delivered" {
-		orderDeliveredEmail(order)
+		logger.Info("Going to send order delivered email")
+		// orderDeliveredEmail(order)
 	}
 	// customer wants to get information via sms on tracking
 	if customer.Meta["allowTexting"] == "true" && customer.Meta["phone"] != "" {
