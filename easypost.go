@@ -178,6 +178,8 @@ func constructMessage(hook easypostWebhook) (string, string) {
 		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉"), "delivered"
 	case "Delivered, In/At Mailbox":
 		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉"), "delivered"
+	case "Delivered":
+		return fmt.Sprint(mostRecentTrackingMessage, ": Your Wallace Hatch ⌚️📦 has been delivered!🎉"), "delivered"
 	}
 	return "", ""
 
