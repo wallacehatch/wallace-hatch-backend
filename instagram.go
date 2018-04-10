@@ -122,7 +122,6 @@ func getInstagramMediaInfo(shortenUrl string) (instagramMediaResp, error) {
 	var msg instagramMediaResp
 	client := &http.Client{}
 	url := fmt.Sprint(instagramApiBaseURL, "media/shortcode/", shortenUrl, "?access_token=", instagramAccessToken)
-	logger.Info("url is : ", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		logger.Error("Error with instagram url request", err)
@@ -164,7 +163,7 @@ func scrapeInstagramPost(mediaId string) instagramMediaResp {
 		new[i] = v
 	}
 	instagramData.Data.Tags = new
-	instagramData.Data.Images.StandardResolution.URL = media.MediaURL
+	instagramData.Data.Images.StandardResolution.URL = media.MediaList[0].URL
 	return instagramData
 }
 
