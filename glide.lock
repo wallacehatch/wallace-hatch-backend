@@ -17,7 +17,7 @@ imports:
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gregm711/easypost-go
-  version: f2d053adeb30a0ad5b40d39c2286a1fb0a1bbdb5
+  version: fe169b70c0140f8994416a470c09fadece4fb886
   subpackages:
   - easypost
   - fake

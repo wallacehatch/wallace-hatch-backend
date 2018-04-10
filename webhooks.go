@@ -161,11 +161,14 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 
 	order, err := fetchOrderById(orderId)
 	if err != nil {
-		logger.Error("Error fetching order from id ", err)
+		logger.Error("Error fetching order from id ", err, orderId)
+		return
+
 	}
 	customer, err := fetchCustomerFromId(order.Customer.ID)
 	if err != nil {
-		logger.Error("Error fetching customer from ID", err)
+		logger.Error("Error fetching customer from ID", err, order.Customer.ID)
+		return
 	}
 	logger.Info(customer.Meta["allowTexting"], customer.Meta["phone"])
 	message, stage := constructMessage(hook)
@@ -173,13 +176,16 @@ func easypostWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	//time to send email
 	if stage == "delivered" {
 		logger.Info("Going to send order delivered email")
-		// orderDeliveredEmail(order)
+		orderDeliveredEmail(order)
 	}
 	// customer wants to get information via sms on tracking
 	if customer.Meta["allowTexting"] == "true" && customer.Meta["phone"] != "" {
 		if message != "" {
-			response, err := sendSMSMessage(customer.Meta["phone"], message)
-			logger.Info(response, err)
+			_, err := sendSMSMessage(customer.Meta["phone"], message)
+			if err != nil {
+				logger.Error("Error sending sms message", err)
+				return
+			}
 		}
 
 	}
