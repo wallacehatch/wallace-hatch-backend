@@ -136,8 +136,8 @@ func orderDeliveredEmail(order stripe.Order) {
 
 	}
 	email := Email{}
-	email.Subject = "Order Shipped"
-	email.PlainText = "Your order has been shipped!"
+	email.Subject = "Order Delivered"
+	email.PlainText = "Your order has been delivered!"
 	email.From = emailSender
 	email.To = emailInfo.To
 	email.Html = bufferBytes.String()
