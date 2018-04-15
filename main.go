@@ -64,6 +64,8 @@ func main() {
 	router.HandleFunc("/get-customer-orders/{key}", fetchPastOrdersHandler).Methods("GET")
 	router.HandleFunc("/validate-review/", validateReviewHandler).Methods("POST")
 	router.HandleFunc("/instagram-media/{key}", fetchInstagramPostInformationHandler).Methods("GET")
+	router.HandleFunc("/instagram-media-recent/", fetchRecentInstagramPosts).Methods("GET")
+
 	handler := c.Handler(router)
 	port := ":8090"
 	logger.Info("Serving on ", port)

@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"html/template"
 	"net"
 	"net/http"
 	"os"
@@ -15,6 +17,8 @@ import (
 
 const (
 	collectionName = "reviews"
+	starFilledUrl  = "https://s3.us-east-2.amazonaws.com/wallace-hatch/fa-star-filled-14.png"
+	starWhiteUrl   = "https://s3.us-east-2.amazonaws.com/wallace-hatch/fa-star-white.png"
 )
 
 func db() *mgo.Database {
@@ -40,43 +44,6 @@ func db() *mgo.Database {
 	defer session.Close()
 
 	return session.Clone().DB(dbName)
-}
-
-type productReviewResp struct {
-	ProductId            string    `json:"product_id" bson:"product_id"`
-	StarRating           float32   `json:"star_rating" bson:"star_rating"`
-	ReviewTitle          string    `json:"review_title" bson:"review_title"`
-	ReviewMessage        string    `json:"review_message" bson:"review_message"`
-	CustomerReviews      int       `json:"customer_reviews" bson:"customer_reviews"`
-	CustomerId           string    `json:"customer_id" bson:"customer_id"`
-	CustomerName         string    `json:"customer_name" bson:"customer_name"`
-	CreatedAt            time.Time `json:"created_at" bson:"created_at"`
-	FriendRecommendation bool      `json:"friend_recommendation" bson:"friend_recommendation"`
-}
-
-type productReview struct {
-	ProductId            string    `json:"product_id" bson:"product_id"`
-	StarRating           float32   `json:"star_rating" bson:"star_rating"`
-	ReviewTitle          string    `json:"review_title" bson:"review_title"`
-	ReviewMessage        string    `json:"review_message" bson:"review_message"`
-	CustomerId           string    `json:"customer_id" bson:"customer_id"`
-	CustomerName         string    `json:"customer_name" bson:"customer_name"`
-	CustomerEmail        string    `json:"customer_email" bson:"customer_email"`
-	CreatedAt            time.Time `json:"created_at" bson:"created_at"`
-	FriendRecommendation bool      `json:"friend_recommendation" bson:"friend_recommendation"`
-	BrandRating          float32   `json:"brand_rating" bson:"brand_rating"`
-	BrandRatingMessage   string    `json:"brand_rating_message" bson:"brand_rating_message"`
-}
-
-type productReviewRequest struct {
-	ProductId            string  `json:"product_id" bson:"product_id"`
-	StarRating           float32 `json:"star_rating" bson:"star_rating"`
-	ReviewTitle          string  `json:"review_title" bson:"review_title"`
-	ReviewMessage        string  `json:"review_message" bson:"review_message"`
-	CustomerEmail        string  `json:"customer_email" bson:"customer_email"`
-	FriendRecommendation bool    `json:"friend_recommendation" bson:"friend_recommendation"`
-	BrandRating          float32 `json:"brand_rating" bson:"brand_rating"`
-	BrandRatingMessage   string  `json:"brand_rating_message" bson:"brand_rating_message"`
 }
 
 func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
@@ -122,11 +89,79 @@ func createProductReviewHandler(w http.ResponseWriter, r *http.Request) {
 		respondErrorJson(err, http.StatusBadRequest, w)
 		return
 	}
+
+	sendReviewEmail(pr)
 	js, _ := json.Marshal(pr)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 	return
+
+}
+
+func sendReviewEmail(rev productReview) {
+
+	bufferBytes := bytes.Buffer{}
+
+	emailItem := EmailItemInformation{}
+	emailItems := make([]EmailItemInformation, 0)
+	skuInfo, _ := fetchSkuById(rev.ProductId)
+	emailItem.ImageUrl = skuInfo.Image
+	emailItem.Name = skuInfo.Desc
+	emailInfo := EmailInformation{}
+	emailInfo.FirstName, _ = nameParser(rev.CustomerName)
+	emailItems = append(emailItems, emailItem)
+	emailInfo.Items = emailItems
+	emailInfo.ReviewTitle = rev.ReviewTitle
+	emailInfo.ReviewMessage = rev.ReviewMessage
+
+	switch rev.StarRating {
+	case 1.0:
+		emailInfo.StarOneUrl = starFilledUrl
+		emailInfo.StarTwoUrl = starWhiteUrl
+		emailInfo.StarThreeUrl = starWhiteUrl
+		emailInfo.StarFourUrl = starWhiteUrl
+		emailInfo.StarFiveUrl = starWhiteUrl
+	case 2.0:
+		emailInfo.StarOneUrl = starFilledUrl
+		emailInfo.StarTwoUrl = starFilledUrl
+		emailInfo.StarThreeUrl = starWhiteUrl
+		emailInfo.StarFourUrl = starWhiteUrl
+		emailInfo.StarFiveUrl = starWhiteUrl
+	case 3.0:
+		emailInfo.StarOneUrl = starFilledUrl
+		emailInfo.StarTwoUrl = starFilledUrl
+		emailInfo.StarThreeUrl = starFilledUrl
+		emailInfo.StarFourUrl = starWhiteUrl
+		emailInfo.StarFiveUrl = starWhiteUrl
+	case 4.0:
+		emailInfo.StarOneUrl = starFilledUrl
+		emailInfo.StarTwoUrl = starFilledUrl
+		emailInfo.StarThreeUrl = starFilledUrl
+		emailInfo.StarFourUrl = starFilledUrl
+		emailInfo.StarFiveUrl = starWhiteUrl
+	case 5.0:
+		emailInfo.StarOneUrl = starFilledUrl
+		emailInfo.StarTwoUrl = starFilledUrl
+		emailInfo.StarThreeUrl = starFilledUrl
+		emailInfo.StarFourUrl = starFilledUrl
+		emailInfo.StarFiveUrl = starFilledUrl
+	}
+
+	tmpl, err := template.ParseFiles("email-templates/review.html")
+	if err != nil {
+		logger.Error("error opening template ", err)
+	}
+	if err := tmpl.Execute(&bufferBytes, emailInfo); err != nil {
+		logger.Error("error executing html ", err)
+	}
+	email := Email{}
+	email.Subject = "Your Review is live!"
+	email.PlainText = "Your review is live!"
+	email.From = emailSender
+	email.To = rev.CustomerEmail
+	email.Html = bufferBytes.String()
+	MailgunSendEmail(email, reviewTag, time.Now())
 
 }
 
@@ -226,9 +261,4 @@ func validateCustomerReview(email string, productId string) (bool, error) {
 		}
 	}
 	return true, nil
-}
-func deleteAllReviews() {
-	db := db()
-	defer db.Session.Close()
-
 }

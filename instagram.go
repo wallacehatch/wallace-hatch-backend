@@ -85,8 +85,31 @@ type instagramMediaData struct {
 	Products                      []stripe.Product `json:"products"`
 }
 
-func getInstagramMediaComments(mediaId string) (instagramCommentResp, error) {
+func fetchRecentInstagramPosts(w http.ResponseWriter, r *http.Request) {
+	client := &http.Client{}
+	url := fmt.Sprint("https://api.instagram.com/v1/users/self/media/recent/?access_token=", instagramAccessToken)
 
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		logger.Error("Error with instagram url request", err)
+	}
+	req.Header.Add("content-type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.Error("Error with  executing instagram get media  request", err)
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error("Error reading all  body from instagram get media  ", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(b)
+	return
+}
+
+func getInstagramMediaComments(mediaId string) (instagramCommentResp, error) {
 	var msg instagramCommentResp
 	client := &http.Client{}
 	url := fmt.Sprint(instagramApiBaseURL, "media/", mediaId, "/comments?access_token=", instagramAccessToken)
@@ -139,13 +162,11 @@ func getInstagramMediaInfo(shortenUrl string) (instagramMediaResp, error) {
 		logger.Error("Error reading all  body from instagram get media  ", err)
 		return msg, err
 	}
-
 	err = json.Unmarshal(b, &msg)
 	if err != nil {
 		logger.Error("error unmarshaling instagram url shorten  data", err)
 		return msg, err
 	}
-
 	return msg, err
 
 }
