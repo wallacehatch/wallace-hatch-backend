@@ -103,6 +103,13 @@ type EmailInformation struct {
 	NumItemsMinus  int
 	CouponCode     string
 	CouponDiscount int
+	StarOneUrl     string
+	StarTwoUrl     string
+	StarThreeUrl   string
+	StarFourUrl    string
+	StarFiveUrl    string
+	ReviewMessage  string
+	ReviewTitle    string
 }
 
 type ResponseError struct {
@@ -261,40 +268,39 @@ type easypostWebhook struct {
 	Object        string        `json:"object"`
 }
 
-// // Event is the resource representing a Stripe event.
-// // For more details see https://stripe.com/docs/api#events.
-// type Event struct {
-// 	Account  string        `json:"account"`
-// 	Created  int64         `json:"created"`
-// 	Data     *EventData    `json:"data"`
-// 	ID       string        `json:"id"`
-// 	Live     bool          `json:"livemode"`
-// 	Request  *EventRequest `json:"request"`
-// 	Type     string        `json:"type"`
-// 	Webhooks uint64        `json:"pending_webhooks"`
-// }
+type productReviewResp struct {
+	ProductId            string    `json:"product_id" bson:"product_id"`
+	StarRating           float32   `json:"star_rating" bson:"star_rating"`
+	ReviewTitle          string    `json:"review_title" bson:"review_title"`
+	ReviewMessage        string    `json:"review_message" bson:"review_message"`
+	CustomerReviews      int       `json:"customer_reviews" bson:"customer_reviews"`
+	CustomerId           string    `json:"customer_id" bson:"customer_id"`
+	CustomerName         string    `json:"customer_name" bson:"customer_name"`
+	CreatedAt            time.Time `json:"created_at" bson:"created_at"`
+	FriendRecommendation bool      `json:"friend_recommendation" bson:"friend_recommendation"`
+}
 
-// // EventRequest contains information on a request that created an event.
-// type EventRequest struct {
-// 	// ID is the request ID of the request that created an event, if the event
-// 	// was created by a request.
-// 	ID string `json:"id"`
+type productReview struct {
+	ProductId            string    `json:"product_id" bson:"product_id"`
+	StarRating           float32   `json:"star_rating" bson:"star_rating"`
+	ReviewTitle          string    `json:"review_title" bson:"review_title"`
+	ReviewMessage        string    `json:"review_message" bson:"review_message"`
+	CustomerId           string    `json:"customer_id" bson:"customer_id"`
+	CustomerName         string    `json:"customer_name" bson:"customer_name"`
+	CustomerEmail        string    `json:"customer_email" bson:"customer_email"`
+	CreatedAt            time.Time `json:"created_at" bson:"created_at"`
+	FriendRecommendation bool      `json:"friend_recommendation" bson:"friend_recommendation"`
+	BrandRating          float32   `json:"brand_rating" bson:"brand_rating"`
+	BrandRatingMessage   string    `json:"brand_rating_message" bson:"brand_rating_message"`
+}
 
-// 	// IdempotencyKey is the idempotency key of the request that created an
-// 	// event, if the event was created by a request and if an idempotency key
-// 	// was specified for that request.
-// 	IdempotencyKey string `json:"idempotency_key"`
-// }
-
-// // EventData is the unmarshalled object as a map.
-// type EventData struct {
-// 	Obj  map[string]interface{}
-// 	Prev map[string]interface{} `json:"previous_attributes"`
-// 	Raw  json.RawMessage        `json:"object"`
-// }
-
-// // EventList is a list of events as retrieved from a list endpoint.
-// type EventList struct {
-// 	ListMeta
-// 	Values []*Event `json:"data"`
-// }
+type productReviewRequest struct {
+	ProductId            string  `json:"product_id" bson:"product_id"`
+	StarRating           float32 `json:"star_rating" bson:"star_rating"`
+	ReviewTitle          string  `json:"review_title" bson:"review_title"`
+	ReviewMessage        string  `json:"review_message" bson:"review_message"`
+	CustomerEmail        string  `json:"customer_email" bson:"customer_email"`
+	FriendRecommendation bool    `json:"friend_recommendation" bson:"friend_recommendation"`
+	BrandRating          float32 `json:"brand_rating" bson:"brand_rating"`
+	BrandRatingMessage   string  `json:"brand_rating_message" bson:"brand_rating_message"`
+}
