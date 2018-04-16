@@ -140,7 +140,7 @@
                     </td>
                   </tr>
                 </table>
-
+                {{ $product := index .Items 0}}
                 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
                   <tr>
                     <td width="600">
@@ -155,11 +155,11 @@
 
                       <div style="display:block; font-size:0pt; line-height:0pt; height:20px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="20" style="display:block; height:20px;" alt=""> </div>
 
-                      <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: normal; font-style: normal; text-transform: uppercase; letter-spacing: 6px; text-align: center; color: #000000;"> {{.Items[0].ProductName}} </div>
+                      <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: normal; font-style: normal; text-transform: uppercase; letter-spacing: 6px; text-align: center; color: #000000;"> {{$product.Name }}  </div>
 
                       <div style="display:block; font-size:0pt; line-height:0pt; height:30px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="30" style="display:block; height:30px;" alt=""> </div>
 
-                      <div > <img src="{{.Items[0].ImageUrl}}" alt="..." class="img-responsive" width="155" height="221" style="max-width: 155px !important; display:block;  margin: 0 auto"> </div>
+                      <div > <img src="{{$product.ImageUrl}}" alt="..." class="img-responsive" width="155" height="221" style="max-width: 155px !important; display:block;  margin: 0 auto"> </div>
 
                       <div style="display:block; font-size:0pt; line-height:0pt; height:20px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="20" style="display:block; height:20px;" alt=""> </div>
                     </td>
@@ -172,7 +172,7 @@
                     <td width="14">
                       <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
 
-                      <div style="display: block; text-align: center;"> <img src="{{.StarUrlOne}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
+                      <div style="display: block; text-align: center;"> <img src="{{.StarOneUrl}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
 
                       <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
                     </td>
@@ -182,7 +182,7 @@
                     <td width="14">
                       <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
 
-                      <div style="display: block; text-align: center;"> <img src="{{.StarUrlTwo}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
+                      <div style="display: block; text-align: center;"> <img src="{{.StarTwoUrl}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
 
                       <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
                     </td>
@@ -192,7 +192,7 @@
                     <td width="14">
                       <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
 
-                      <div style="display: block; text-align: center;"> <img src="{{.StarUrlThree}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
+                      <div style="display: block; text-align: center;"> <img src="{{.StarThreeUrl}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
 
                       <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
                     </td>
@@ -201,7 +201,7 @@
                   <td width="14">
                     <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
 
-                    <div style="display: block; text-align: center;"> <img src="{{.StarUrlFour}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
+                    <div style="display: block; text-align: center;"> <img src="{{.StarFourUrl}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
 
                     <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
                   </td>
@@ -210,7 +210,7 @@
                 <td width="14">
                   <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
 
-                  <div style="display: block; text-align: center;"> <img src="{{.StarUrlFive}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
+                  <div style="display: block; text-align: center;"> <img src="{{.StarFiveUrl}}" alt="..." class="img-responsive" width="14" height="14" style="max-width: 14px !important;"> </div>
 
                   <div style="display:block; font-size:0pt; line-height:0pt; height:15px;"><img src="http://dhruphost.com/mysite/email-templet/dhjan2018_409/empty.gif" width="1" height="15" style="display:block; height:15px;" alt=""> </div>
                 </td>
@@ -240,7 +240,7 @@
                   <tbody>
                     <tr>
                       <td style="color:#000000; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-size: 12px; line-height: 1.67; letter-spacing: 3px; text-align:center; font-weight:700;" width="260" height="50" class="text-center">
-                        <a href="#" target="_blank" mc:edit="track1" style="color:#000000; text-decoration:none;display: block; font-family: 'Montserrat', sans-serif;"> view review </a>
+                        <a href="https://wallacehatch.com" target="_blank" mc:edit="track1" style="color:#000000; text-decoration:none;display: block; font-family: 'Montserrat', sans-serif;"> view review </a>
                       </td>
                     </tr>
                   </tbody>

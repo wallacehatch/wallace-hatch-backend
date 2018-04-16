@@ -226,6 +226,6 @@ func MailgunSendEmail(email Email, tag string, deliveryTime time.Time) (res stri
 	if err != nil {
 		logger.Error("Error sending email from mailgun ", err)
 	}
-
+	logger.Info("queued ", id)
 	return id, err
 }

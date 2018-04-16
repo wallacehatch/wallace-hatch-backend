@@ -105,9 +105,10 @@ func sendReviewEmail(rev productReview) {
 
 	emailItem := EmailItemInformation{}
 	emailItems := make([]EmailItemInformation, 0)
-	skuInfo, _ := fetchSkuById(rev.ProductId)
-	emailItem.ImageUrl = skuInfo.Image
-	emailItem.Name = skuInfo.Desc
+	product, _ := fetchProductById(rev.ProductId)
+
+	emailItem.ImageUrl = product.Images[0]
+	emailItem.Name = product.Name
 	emailInfo := EmailInformation{}
 	emailInfo.FirstName, _ = nameParser(rev.CustomerName)
 	emailItems = append(emailItems, emailItem)
@@ -147,7 +148,6 @@ func sendReviewEmail(rev productReview) {
 		emailInfo.StarFourUrl = starFilledUrl
 		emailInfo.StarFiveUrl = starFilledUrl
 	}
-
 	tmpl, err := template.ParseFiles("email-templates/review.html")
 	if err != nil {
 		logger.Error("error opening template ", err)
